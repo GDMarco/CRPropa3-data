@@ -5,7 +5,7 @@ import os
 import gitHelp as gh
 import math
 from crpropa import eV, mass_electron, c_light, h_planck, GeV
-from calc_all import fields_cmbebl, fields_urb, fields_CnuB
+from calc_all import reduced_fields, fields_CnuB
 from units import me2, sigmaThomson, alpha, mm2, mt2, mW2, mZ2, mUp2, mDown2
 from units import mCharm2, mStrange2, mBottom2, mTop2, mNu2, Gf, gammaZ2, sW2
 
@@ -425,7 +425,7 @@ def process(sigma, field, name):
         name  : name of the process which will be calculated. Necessary for the naming of the data folder
     """
     
-    folder = 'data/NeutrinoNeutrinoInteractionsE1027Mass01/' + name
+    folder = 'data/NeutrinoInteractions/' + name
     if not os.path.exists(folder):
         os.makedirs(folder)
 
@@ -503,7 +503,7 @@ def process(sigma, field, name):
 
 if __name__ == "__main__":
 
-    for field in fields_cmbebl+fields_urb:
+    for field in reduced_fields:
         print(field.name)
         process(sigmaNuElGamma, field, 'NeutrinoElectronPhotonInteraction')
         process(sigmaNuMuGamma, field, 'NeutrinoMuonPhotonInteraction')

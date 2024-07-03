@@ -1,28 +1,29 @@
 import time
 import subprocess
 import photonField
+import neutrinoField
 
 # Field list used in the default CRPropa tar-ball
 # imported in calc_* files therefore the have to be 
 # defined before other import statements.
 reduced_fields = [
         photonField.CMB(),
-        photonField.EBL_Gilmore12(),
-        photonField.URB_Protheroe96()
-        ]
+        photonField.EBL_Saldana21(),
+        #photonField.URB_Nitu21()
+    ]
 
 fields_cmbebl = [
         photonField.CMB(),
-        photonField.EBL_Kneiske04(),
-        photonField.EBL_Stecker05(),
-        photonField.EBL_Franceschini08(),
-        photonField.EBL_Finke10(),
-        photonField.EBL_Dominguez11(),
-        photonField.EBL_Dominguez11('lower'),
-        photonField.EBL_Dominguez11('upper'),
-        photonField.EBL_Gilmore12(),
-        photonField.EBL_Stecker16('lower'),
-        photonField.EBL_Stecker16('upper'), 
+        #photonField.EBL_Kneiske04(),
+        #photonField.EBL_Stecker05(),
+        #photonField.EBL_Franceschini08(),
+        #photonField.EBL_Finke10(),
+        #photonField.EBL_Dominguez11(),
+        #photonField.EBL_Dominguez11('lower'),
+        #photonField.EBL_Dominguez11('upper'),
+        #photonField.EBL_Gilmore12(),
+        #photonField.EBL_Stecker16('lower'),
+        #photonField.EBL_Stecker16('upper'), 
         photonField.EBL_Saldana21(), 
         photonField.EBL_Saldana21('upper'), 
         photonField.EBL_Saldana21('lower')
@@ -32,6 +33,10 @@ fields_urb = [
         photonField.URB_Protheroe96(),
         photonField.URB_Fixsen11(),
         photonField.URB_Nitu21()
+    ]
+
+fields_CnuB = [
+        neutrinoField.CnuB() 
     ]
 
 import calc_elasticscattering as es

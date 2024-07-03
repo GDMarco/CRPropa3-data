@@ -179,7 +179,7 @@ massNukg = mWkg * massNuGeV / massWGeV
 mNu2 = (massNukg*c_light**2.) ** 2 # squared neutrino mass [J^2/c^4]
  
 GfGeV = 1.1663787e-5 #GeV^-2
-hbar = h_planck / 2. / math.pi / GeV # GeV * s
+hbar = h_planck / 2. / pi / GeV # GeV * s
 GeVtom2 = (hbar * c_light)**2 # GeV^2 * cm^2 / s^2
 Gf = GfGeV * GeVtom2 # m^2
 
