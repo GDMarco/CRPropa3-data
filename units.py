@@ -63,6 +63,7 @@ amu = 1.660538921e-27 * kilogram
 mass_proton = 1.67262158e-27 * kilogram
 mass_neutron = 1.67492735e-27 * kilogram
 mass_electron = 9.10938291e-31 * kilogram
+mass_muon = 1.883531627e-28 * kilogram
 h_planck = 6.62606957e-34 * joule * second
 k_boltzmann = 1.3806488e-23 * joule / kelvin
 mu0 = 4 * pi * 1e-7 * newton / ampere / ampere
@@ -70,6 +71,18 @@ epsilon0 = 1.0 / mu0 / c_squared * ampere * second / volt / meter
 alpha_finestructure = eplus * eplus / 2. / epsilon0 / h_planck / c_light
 radius_electron = eplus * eplus / 4. / pi / epsilon0 / mass_electron / c_squared
 sigma_thomson = 8. * pi / 3. * radius_electron * radius_electron
+radius_muon = eplus * eplus / 4. / pi / epsilon0 / mass_muon / c_squared
+sigma_thomson_muon = 8. * pi / 3. * radius_muon * radius_muon
+
+#mass W boson
+massWGeV = 80.379
+mWkg = 1.43288582 * 1e-25 #kg
+mW2 = (mWkg*c_light**2.) ** 2 #squared W mass [J^2/c^4]
+
+#mass pion
+massPionGeV = 139.57039e-3 #GeV/c^2
+mass_pion = mWkg * massPionGeV / massWGeV #kg
+
 
 # gauss
 gauss = 1e-4 * tesla

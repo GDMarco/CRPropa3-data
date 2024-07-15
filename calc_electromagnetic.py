@@ -4,20 +4,42 @@ import interactionRate
 import os
 import gitHelp as gh
 from calc_all import fields_cmbebl, fields_urb
-from units import eV, mass_electron, c_light, sigma_thomson, alpha_finestructure
+from units import eV, mass_electron, c_light, sigma_thomson, alpha_finestructure, h_planck, mass_muon, sigma_thomson_muon, mass_pion
 
 me2 = (mass_electron*c_light**2.) ** 2  # squared electron mass [J^2/c^4]
+mm2 = (mass_muon*c_light**2.) ** 2  # squared muon mass [J^2/c^4]
+mp2 = (mass_pion*c_light**2.) ** 2 # squared pion mass [J^2/c^4]
 
 def sigmaPP(s):
     """ Pair production cross section (Breit-Wheeler), see Lee 1996 """
     smin = 4 * me2
     if (s < smin):
         return 0.
-
+    
     b = np.sqrt(1 - smin / s)
     return sigma_thomson * 3 / 16 * (1 - b**2) * ((3 - b**4) * (np.log1p(b) - np.log1p(-b)) - 2 * b * (2 - b**2))
 
+def sigmaMPP(s):
+    """ Muon Pair production cross section (Breit-Wheeler), see Lee 1996 """
+    smin = 4 * mm2
+    if (s < smin):
+        return 0.
 
+    b = np.sqrt(1 - smin / s)
+    return sigma_thomson_muon * 3 / 16 * (1 - b**2) * ((3 - b**4) * (np.log1p(b) - np.log1p(-b)) - 2 * b * (2 - b**2))
+
+def sigmaCPPP(s):
+    """ Charged Pion Pair production cross section, see Brodsky+ 1971 (Born approximation, for point-like pion). """
+    smin = 4 * mp2
+    if (s < smin):
+        return 0.
+    
+    # I multiply the cross section by h_planck**2 * c_light**2 / (2.*np.pi)**2 to move to the SI units
+    C = 2 * np.pi * alpha_finestructure*alpha_finestructure * c_light*c_light * h_planck*h_planck / (2.*np.pi) / (2.*np.pi) / s
+    y = smin / s
+    
+    return C * ((1 + y) * np.sqrt(1 - y) - 2 * y * (1 - y / 2) * np.log(np.sqrt(1 / y) + np.sqrt(1 / y - 1)))
+    
 def sigmaDPP(s):
     """ Double-pair production cross section, see R.W. Brown eq. (4.5) with k^2 = q^2 = 0 """
     smin = 16 * me2
@@ -51,7 +73,7 @@ def sigmaTPP(s):
 
 def getTabulatedXS(sigma, skin):
     """ Get crosssection for tabulated s_kin """
-    if sigma in (sigmaPP, sigmaDPP):  # photon interactions
+    if sigma in (sigmaPP, sigmaDPP, sigmaMPP, sigmaCPPP):  # photon interactions
         return np.array([sigma(s) for s in skin])
     if sigma in (sigmaTPP, sigmaICS):  # electron interactions
         return np.array([sigma(s) for s in skin + me2])
@@ -61,6 +83,8 @@ def getTabulatedXS(sigma, skin):
 def getSmin(sigma):
     """ Return minimum required s_kin = s - (mc^2)^2 for interaction """
     return {sigmaPP: 4 * me2,
+            sigmaMPP: 4 * mm2,
+            sigmaCPPP: 4 * mp2,
             sigmaDPP: 16 * me2,
             sigmaTPP: np.exp((218 / 27) / (28 / 9)) * me2 - me2,
             sigmaICS: 1e-40 * me2
@@ -88,7 +112,7 @@ def process(sigma, field, name):
 
     # tabulated energies, limit to energies where the interaction is possible
     Emin = getEmin(sigma, field)
-    E = np.logspace(9, 23, 281) * eV
+    E = np.logspace(9, 26, 281) * eV
     E = E[E > Emin]
     
     # -------------------------------------------
@@ -96,7 +120,7 @@ def process(sigma, field, name):
     # -------------------------------------------
     # tabulated values of s_kin = s - mc^2
     # Note: integration method (Romberg) requires 2^n + 1 log-spaced tabulation points
-    s_kin = np.logspace(4, 23, 2 ** 18 + 1) * eV**2
+    s_kin = np.logspace(4, 25, 2 ** 18 + 1) * eV**2 # smax was 23
     xs = getTabulatedXS(sigma, s_kin)
     rate = interactionRate.calc_rate_s(s_kin, xs, E, field)
 
@@ -124,14 +148,14 @@ def process(sigma, field, name):
 
     # tabulated values of s_kin = s - mc^2, limit to relevant range
     # Note: use higher resolution and then downsample
-    skin = np.logspace(4, 23, 380000 + 1) * eV**2
+    skin = np.logspace(4, 25, 380000 + 1) * eV**2 # smax was 23
     skin = skin[skin > skin_min]
 
     xs = getTabulatedXS(sigma, skin)
     rate = interactionRate.calc_rate_s(skin, xs, E, field, cdf=True)
 
     # downsample
-    skin_save = np.logspace(4, 23, 190 + 1) * eV**2
+    skin_save = np.logspace(4, 25, 190 + 1) * eV**2 # smax was 23
     skin_save = skin_save[skin_save > skin_min]
     rate_save = np.array([np.interp(skin_save, skin, r) for r in rate])
 
@@ -158,7 +182,9 @@ if __name__ == "__main__":
 
     for field in fields_cmbebl+fields_urb:
         print(field.name)
-        process(sigmaPP, field, 'EMPairProduction')
-        process(sigmaDPP, field, 'EMDoublePairProduction')
-        process(sigmaTPP, field, 'EMTripletPairProduction')
-        process(sigmaICS, field, 'EMInverseComptonScattering')
+        #process(sigmaPP, field, 'EMPairProduction')
+        #process(sigmaMPP, field, 'EMMuonPairProduction')
+        process(sigmaCPPP, field, 'EMChargedPionPairProduction')
+        #process(sigmaDPP, field, 'EMDoublePairProduction')
+        #process(sigmaTPP, field, 'EMTripletPairProduction')
+        #process(sigmaICS, field, 'EMInverseComptonScattering')
