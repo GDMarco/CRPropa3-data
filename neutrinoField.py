@@ -77,7 +77,7 @@ class CnuB(NeutrinoField):
         Comoving spectral number density dn/deps [1/m^3/J] at given neutrino energy eps [J] and redshift z.
         Multiply with (1+z)^3 for the physical number density.
         """
-        return 8*np.pi / c_light**3 / h_planck**3 * eps**2 / np.expm1(eps / (k_boltzmann * self.T_CnuB)) 
+        return 8*np.pi / c_light**3 / h_planck**3 * eps**2 / (np.exp(eps / (k_boltzmann * self.T_CnuB)) + 1) # it follows Fermi-Dirac distribution!
 
     def getEmin(self, z=0):
         """Minimum effective neutrino energy in [J]"""
