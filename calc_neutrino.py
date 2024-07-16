@@ -62,7 +62,7 @@ def sigmaNuTauGamma(s): #,massLep,alpha,Gf,massW
     return np.sqrt(2.)*alpha*Gf*(2.*(1.-1./(s/mW2))*(1.+2./(s/mW2)**2.-1./(s/mW2)**2*np.log((s/mW2)))+1./(s/mW2)*(1.-2./(s/mW2)+2./(s/mW2)**2)*np.log(logFactor))
 
 ################### 
-#def sigmaTrident(s): # to compute the total cross section for these
+#def sigmaTrident(s): # take data from Rhorry's table and interpolate
 #    return 0.
 
 def funcNuNuxZres(Qf, t3, nf, s, mf2):
