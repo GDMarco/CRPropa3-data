@@ -4,12 +4,27 @@ import interactionRate
 import os
 import gitHelp as gh
 from calc_all import fields_cmbebl, fields_urb
-from units import eV, mass_electron, c_light, sigma_thomson, alpha_finestructure, h_planck, mass_muon, sigma_thomson_muon, mass_pion
+from units import eV, mass_electron, c_light, sigma_thomson, alpha_finestructure, h_planck
+from units import cm, mass_muon, sigma_thomson_muon, mass_pion
+import matplotlib.pyplot as plt
 
 me2 = (mass_electron*c_light**2.) ** 2  # squared electron mass [J^2/c^4]
 mm2 = (mass_muon*c_light**2.) ** 2  # squared muon mass [J^2/c^4]
-mp2 = (mass_pion*c_light**2.) ** 2 # squared pion mass [J^2/c^4]
+mp2 = (mass_pion*c_light**2.) ** 2 # squared charged pion mass [J^2/c^4]
 
+def pbTom2(CSpb):
+    pico = 1e-12
+    frombtom2 = 1e-28
+    #fromm2tocm2 = 1e4 
+    
+    CSb = CSpb * pico
+    CSm2 = CSb * frombtom2
+    #CScm2 = CSm2 * fromm2tocm2
+    
+    return CSm2
+    
+    
+    
 def sigmaPP(s):
     """ Pair production cross section (Breit-Wheeler), see Lee 1996 """
     smin = 4 * me2
@@ -70,12 +85,34 @@ def sigmaTPP(s):
     
     return sigma_thomson * 3 / 8 / np.pi * alpha_finestructure * beta
 
+def sigmaEMPP(s):
+    """Electron muon pair production, total cross section from tables found in MUNHECA code"""
+    smin = (np.sqrt(me2) + 2. * np.sqrt(mm2)) ** 2 
+    if (s < smin):
+        return 0
+    
+    dataPath = "/Applications/CRPropa/EMCascadePlugins/CRPropa3-data/data/EMElectronMuonPairProduction/"
+    filename = "EMPP_totalCS.txt"
+    
+    sTab, CSTab = np.genfromtxt(dataPath + filename, comments='#', usecols=(0,1), unpack=True) 
+    CSTab = pbTom2(CSTab)
+    sTab = sTab * eV**2
+    
+    if ((s < sTab[0]) or (s > sTab[-1])):
+        return 0 
+    
+    from scipy.interpolate import interp1d 
+    
+    interpFunc = interp1d(sTab, CSTab)
+    CS = interpFunc(s)
+    
+    return CS
 
 def getTabulatedXS(sigma, skin):
     """ Get crosssection for tabulated s_kin """
     if sigma in (sigmaPP, sigmaDPP, sigmaMPP, sigmaCPPP):  # photon interactions
         return np.array([sigma(s) for s in skin])
-    if sigma in (sigmaTPP, sigmaICS):  # electron interactions
+    if sigma in (sigmaTPP, sigmaICS, sigmaEMPP):  # electron interactions
         return np.array([sigma(s) for s in skin + me2])
     return False
 
@@ -87,7 +124,8 @@ def getSmin(sigma):
             sigmaCPPP: 4 * mp2,
             sigmaDPP: 16 * me2,
             sigmaTPP: np.exp((218 / 27) / (28 / 9)) * me2 - me2,
-            sigmaICS: 1e-40 * me2
+            sigmaICS: 1e-40 * me2, 
+            sigmaEMPP: (np.sqrt(me2) + 2. * np.sqrt(mm2)) ** 2
             }[sigma]
 
 
@@ -184,7 +222,8 @@ if __name__ == "__main__":
         print(field.name)
         #process(sigmaPP, field, 'EMPairProduction')
         #process(sigmaMPP, field, 'EMMuonPairProduction')
-        process(sigmaCPPP, field, 'EMChargedPionPairProduction')
+        #process(sigmaCPPP, field, 'EMChargedPionPairProduction')
+        process(sigmaEMPP, field, 'EMElectronMuonPairProduction')
         #process(sigmaDPP, field, 'EMDoublePairProduction')
         #process(sigmaTPP, field, 'EMTripletPairProduction')
         #process(sigmaICS, field, 'EMInverseComptonScattering')
