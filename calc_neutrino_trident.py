@@ -5,7 +5,7 @@ import os
 import gitHelp as gh
 import math
 from scipy.interpolate import interp1d
-from crpropa import eV, mass_electron, c_light, h_planck, GeV
+from crpropa import eV, mass_electron, c_light, h_planck, GeV, cm 
 from calc_all import reduced_fields
 from units import me2, sigmaThomson, alpha, mm2, mt2, mW2, mZ2, mUp2, mDown2
 from units import mCharm2, mStrange2, mBottom2, mTop2, mNu2, Gf, gammaZ2, sW2
@@ -42,9 +42,9 @@ def getTables(dataPath, processFile):
     Ecms2 = np.array(Ecms2)
     Sigmacm2 = np.array(Sigmacm2)
 
-    return Ecms2, Sigmacm2
+    return Ecms2 * eV * eV, Sigmacm2 * cm * cm 
 
-dataPath = 'Applications/CRPropa/NuPropa/PartonicCalculation/sigmaNu/Ecms_scan/'
+dataPath = '/Applications/CRPropa/NuPropa/PartonicCalculation/sigmaNu/Ecms_scan/'
 
 def sigma101(s):
     '''nu gamma -> nu e- e+'''
@@ -54,8 +54,6 @@ def sigma101(s):
     
     processFile = 'SigmaIncl_Ecms_channel101_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -71,8 +69,6 @@ def sigma102(s):
     processFile = 'SigmaIncl_Ecms_channel102_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
-    print(Ecms2, sigma)
-    
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
     
@@ -86,8 +82,6 @@ def sigma103(s):
     
     processFile = 'SigmaIncl_Ecms_channel103_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -103,8 +97,6 @@ def sigma104(s):
     processFile = 'SigmaIncl_Ecms_channel104_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
-    print(Ecms2, sigma)
-    
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
     
@@ -118,8 +110,6 @@ def sigma105(s):
     
     processFile = 'SigmaIncl_Ecms_channel105_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -135,8 +125,6 @@ def sigma106(s):
     processFile = 'SigmaIncl_Ecms_channel106_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
-    print(Ecms2, sigma)
-    
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
     
@@ -150,8 +138,6 @@ def sigma107(s):
     
     processFile = 'SigmaIncl_Ecms_channel107_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -167,8 +153,6 @@ def sigma108(s):
     processFile = 'SigmaIncl_Ecms_channel108_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
-    print(Ecms2, sigma)
-    
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
     
@@ -182,8 +166,6 @@ def sigma109(s):
     
     processFile = 'SigmaIncl_Ecms_channel109_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -199,8 +181,6 @@ def sigma110(s):
     processFile = 'SigmaIncl_Ecms_channel110_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
-    print(Ecms2, sigma)
-    
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
     
@@ -214,8 +194,6 @@ def sigma111(s):
     
     processFile = 'SigmaIncl_Ecms_channel111_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -231,8 +209,6 @@ def sigma112(s):
     processFile = 'SigmaIncl_Ecms_channel112_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
-    print(Ecms2, sigma)
-    
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
     
@@ -246,8 +222,6 @@ def sigma113(s):
     
     processFile = 'SigmaIncl_Ecms_channel113_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -263,8 +237,6 @@ def sigma114(s):
     processFile = 'SigmaIncl_Ecms_channel114_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
-    print(Ecms2, sigma)
-    
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
     
@@ -278,8 +250,6 @@ def sigma115(s):
     
     processFile = 'SigmaIncl_Ecms_channel115_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -295,8 +265,6 @@ def sigma116(s):
     processFile = 'SigmaIncl_Ecms_channel116_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
-    print(Ecms2, sigma)
-    
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
     
@@ -310,8 +278,6 @@ def sigma117(s):
     
     processFile = 'SigmaIncl_Ecms_channel117_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -327,8 +293,6 @@ def sigma118(s):
     processFile = 'SigmaIncl_Ecms_channel118_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
-    print(Ecms2, sigma)
-    
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
     
@@ -342,8 +306,6 @@ def sigma119(s):
     
     processFile = 'SigmaIncl_Ecms_channel119_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -359,8 +321,6 @@ def sigma120(s):
     processFile = 'SigmaIncl_Ecms_channel120_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
-    print(Ecms2, sigma)
-    
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
     
@@ -374,8 +334,6 @@ def sigma121(s):
     
     processFile = 'SigmaIncl_Ecms_channel121_s3.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
-    
-    print(Ecms2, sigma)
     
     interpFunc = interp1d(Ecms2, sigma)
     CS = interpFunc(s)
@@ -418,7 +376,7 @@ def getSmin(sigma):
             sigma119: (np.sqrt(mUp2) + np.sqrt(me2) + np.sqrt(mDown2))**2,
             sigma120: (np.sqrt(mUp2) + np.sqrt(mm2) + np.sqrt(mDown2))**2,
             sigma121: (np.sqrt(mUp2) + np.sqrt(mt2) + np.sqrt(mDown2))**2
-        }
+        }[sigma]
 
 def getEmin(sigma, field, s_kin):
     """ Return minimum required cosmic ray energy for interaction *sigma* with *field* """
@@ -443,7 +401,7 @@ def process(sigma, field, name):
     # -------------------------------------------
     # tabulated values of s_kin = s - mc^2
     # Note: integration method (Romberg) requires 2^n + 1 log-spaced tabulation points
-    s_kin = np.logspace(4, 28, 2 ** 18 + 1) * eV**2  
+    s_kin = np.logspace(4, 23, 2 ** 18 + 1) * eV**2  
     xs = getTabulatedXS(sigma, s_kin)
     
     # tabulated energies, limit to energies where the interaction is possible
@@ -479,14 +437,14 @@ def process(sigma, field, name):
 
     # tabulated values of s_kin = s - mc^2, limit to relevant range
     # Note: use higher resolution and then downsample
-    skin = np.logspace(4, 28, 380000 + 1) * eV**2 
+    skin = np.logspace(4, 23, 380000 + 1) * eV**2 
     skin = skin[skin > skin_min]
 
     xs = getTabulatedXS(sigma, skin)
     rate = interactionRate.calc_rate_s(skin, xs, E, field, cdf=True)
 
     # downsample
-    skin_save = np.logspace(4, 28, 190 + 1) * eV**2 
+    skin_save = np.logspace(4, 23, 190 + 1) * eV**2 
     skin_save = skin_save[skin_save > skin_min] 
     rate_save = np.array([np.interp(skin_save, skin, r) for r in rate])
 

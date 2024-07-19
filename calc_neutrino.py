@@ -62,8 +62,6 @@ def sigmaNuTauGamma(s): #,massLep,alpha,Gf,massW
     return np.sqrt(2.)*alpha*Gf*(2.*(1.-1./(s/mW2))*(1.+2./(s/mW2)**2.-1./(s/mW2)**2*np.log((s/mW2)))+1./(s/mW2)*(1.-2./(s/mW2)+2./(s/mW2)**2)*np.log(logFactor))
 
 ################### 
-#def sigmaTrident(s): # take data from Rhorry's table and interpolate
-#    return 0.
 
 def funcNuNuxZres(Qf, t3, nf, s, mf2):
     ''' mf2 = (mass_f[kg] * c_light**2)**2 '''
@@ -176,8 +174,7 @@ def sigmaNuNuxZel(s):
     """Neutrino-(anti)neutrino interaction Z-exchange interaction cross section, see Roulet (1992) Eq. 2.3"""
     
     smin = mNu2
-    sthr = mZ2
-    if (s < smin or s > sthr):
+    if (s < smin):
         return 0.
     
     Pz = mZ2*mZ2 / ((s-mZ2)**2+gammaZ2*mZ2) 
@@ -293,8 +290,20 @@ def sigmaNuNuxWZTa(s):
     CS = 2.*Gf*Gf/math.pi/h_planck/h_planck/c_light/c_light*(2.*math.pi)*(2.*math.pi)*(sW2-0.5)*Pz*(s-mZ2)/mZ2*s*F2val
     return CS
     
-def sigmaNuNuxLepZ(s):
-    """Neutrino-(anti)neutrino (t-channel lepton exchange + s-channel Z-exchange) interaction cross section, see Roulet (1992) Eq. 2.6"""
+def sigmaNuNuxZProd(s):
+    """Neutrino-(anti)neutrino (t-channel lepton exchange + s-channel Z-exchange) interaction cross section, W bosons production, see Roulet (1992) new version, Eq. 2.7"""
+    smin = 4.*mZ2
+    if (s < smin):
+        return 0.
+    
+    beta = np.sqrt(1.-4.*mZ2/s)
+    L = np.log((1.+beta)/(1.-beta))
+    y = s/mZ2
+    
+    return Gf*Gf/math.pi/h_planck/h_planck/c_light/c_light*(2.*math.pi)*(2.*math.pi)*mZ2*beta/(y-2)*(2./y-1.+(4.+y*y)/2./y/y/beta*L)
+
+def sigmaNuNuxWProd(s):
+    """Neutrino-(anti)neutrino (t-channel lepton exchange + s-channel Z-exchange) interaction cross section, Z bosons production, see Roulet (1992) Eq. 2.6"""
     smin = 4.*mW2
     if (s < smin):
         return 0.
@@ -319,7 +328,7 @@ def sigmaNuNuel(s):
     if (s < smin):
         return 0.
     
-    return Gf*Gf*mZ2/math.pi/h_planck/h_planck/c_light/c_light*(2.*math.pi)*(2.*math.pi)*(s/(s+mZ2)+2.*mZ2/(2.*mZ2+s)*np.log(1.+s/mZ2))
+    return Gf*Gf*mZ2/2./math.pi/h_planck/h_planck/c_light/c_light*(2.*math.pi)*(2.*math.pi)*(s/(s+mZ2)+2.*mZ2/(2.*mZ2+s)*np.log(1.+s/mZ2))
 
 ###################
 sigmaNuNuxZres = [
@@ -354,7 +363,7 @@ def getTabulatedXS(sigma, skin):
     if sigma in (sigmaNuElGamma, sigmaNuMuGamma, sigmaNuTauGamma):
         # photon-neutrino interaction
         return np.array([sigma(s) for s in skin + mNu2])
-    if sigma in (sigmaNuNuel, sigmaNuNuxLepZ, sigmaNuNuxWZEl,
+    if sigma in (sigmaNuNuel, sigmaNuNuxWZEl,
                  sigmaNuNuxWZMu,
                  sigmaNuNuxWZTa, sigmaNuiNujZel, 
                  sigmaNuNuxZel, sigmaNuNuxZresEl,
@@ -370,7 +379,8 @@ def getTabulatedXS(sigma, skin):
                  sigmaNuiNuxjWMuElx,
                  sigmaNuiNuxjWMuTax,
                  sigmaNuiNuxjWTaElx,
-                 sigmaNuiNuxjWTaMux, sigmaNuiNuxjZel):  
+                 sigmaNuiNuxjWTaMux, sigmaNuiNuxjZel,
+                 sigmaNuNuxWProd, sigmaNuNuxZProd):  
             # neutrino-neutrino interaction
         return np.array([sigma(s) for s in skin + 4.*mNu2 ])
     return False
@@ -385,7 +395,8 @@ def getSmin(sigma):
             
             sigmaNuNuel: 4.*mNu2, 
             sigmaNuiNujZel: 4.*mNu2, 
-            sigmaNuNuxLepZ: 4.*mW2,
+            sigmaNuNuxWProd: 4.*mW2,
+            sigmaNuNuxZProd: 4.*mZ2,
             sigmaNuNuxZel: 4.*mNu2,
             sigmaNuiNuxjZel: 4.*mNu2,
             
@@ -513,7 +524,8 @@ if __name__ == "__main__":
         print(field.name)
         process(sigmaNuNuel, field, 'NeutrinoNeutrinoElastic')
         process(sigmaNuiNujZel, field, 'NeutrinoiNeutrinojElastic')
-        process(sigmaNuNuxLepZ, field, 'NeutrinoAntineutrinoWProduction')
+        process(sigmaNuNuxWProd, field, 'NeutrinoAntineutrinoWProduction')
+        process(sigmaNuNuxZProd, field, 'NeutrinoAntineutrinoZProduction')
         process(sigmaNuNuxZel, field, 'NeutrinoAntineutrinoElastic')
         process(sigmaNuiNuxjZel, field, 'NeutrinoiAntineutrinojElastic')
         
