@@ -44,7 +44,7 @@ def getTables(dataPath, processFile):
 
     return Ecms2 * eV * eV, Sigmacm2 * cm * cm 
 
-dataPath = '/Applications/CRPropa/NuPropa/PartonicCalculation/sigmaNu/Ecms_scan/'
+dataPath = '/Applications/CRPropa/NuPropa/PartonicCalculation/sigmaNu/Ecms_scan/Ecms_scan_500/'
 
 def sigma101(s):
     '''nu gamma -> nu e- e+'''
@@ -52,7 +52,7 @@ def sigma101(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel101_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel101_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -66,7 +66,7 @@ def sigma102(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel102_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel102_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -80,7 +80,7 @@ def sigma103(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel103_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel103_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -94,7 +94,7 @@ def sigma104(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel104_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel104_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -108,7 +108,7 @@ def sigma105(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel105_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel105_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -122,7 +122,7 @@ def sigma106(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel106_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel106_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -136,7 +136,7 @@ def sigma107(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel107_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel107_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -150,7 +150,7 @@ def sigma108(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel108_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel108_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -164,7 +164,7 @@ def sigma109(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel109_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel109_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -178,7 +178,7 @@ def sigma110(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel110_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel110_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -192,7 +192,7 @@ def sigma111(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel111_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel111_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -206,7 +206,7 @@ def sigma112(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel112_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel112_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -220,7 +220,7 @@ def sigma113(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel113_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel113_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -234,7 +234,7 @@ def sigma114(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel114_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel114_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -248,7 +248,7 @@ def sigma115(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel115_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel115_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -262,7 +262,7 @@ def sigma116(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel116_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel116_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -276,7 +276,7 @@ def sigma117(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel117_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel117_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -290,7 +290,7 @@ def sigma118(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel118_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel118_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -304,7 +304,7 @@ def sigma119(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel119_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel119_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -318,7 +318,7 @@ def sigma120(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel120_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel120_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -332,7 +332,8 @@ def sigma121(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel121_s3.txt'
+    processFile = 'SigmaIncl_Ecms_channel121_s1
+    .txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)
@@ -401,7 +402,7 @@ def process(sigma, field, name):
     # -------------------------------------------
     # tabulated values of s_kin = s - mc^2
     # Note: integration method (Romberg) requires 2^n + 1 log-spaced tabulation points
-    s_kin = np.logspace(4, 23, 2 ** 18 + 1) * eV**2  
+    s_kin = np.logspace(4, 27, 2 ** 18 + 1) * eV**2  
     xs = getTabulatedXS(sigma, s_kin)
     
     # tabulated energies, limit to energies where the interaction is possible
@@ -437,14 +438,14 @@ def process(sigma, field, name):
 
     # tabulated values of s_kin = s - mc^2, limit to relevant range
     # Note: use higher resolution and then downsample
-    skin = np.logspace(4, 23, 380000 + 1) * eV**2 
+    skin = np.logspace(4, 27, 380000 + 1) * eV**2 
     skin = skin[skin > skin_min]
 
     xs = getTabulatedXS(sigma, skin)
     rate = interactionRate.calc_rate_s(skin, xs, E, field, cdf=True)
 
     # downsample
-    skin_save = np.logspace(4, 23, 190 + 1) * eV**2 
+    skin_save = np.logspace(4, 27, 190 + 1) * eV**2 
     skin_save = skin_save[skin_save > skin_min] 
     rate_save = np.array([np.interp(skin_save, skin, r) for r in rate])
 
@@ -484,11 +485,11 @@ if __name__ == "__main__":
         process(sigma111, field, 'NeutrinoElPhotonElTa')
         process(sigma112, field, 'NeutrinoMuPhotonMuEl')
         process(sigma113, field, 'NeutrinoMuPhotonMuTa')
-        process(sigma114, field, 'NeutrinTaPhotonTaEl')
+        process(sigma114, field, 'NeutrinoTaPhotonTaEl')
         process(sigma115, field, 'NeutrinoTaPhotonTaMu')
         process(sigma116, field, 'NeutrinoElPhotonElPair')
         process(sigma117, field, 'NeutrinoMuPhotonMuPair')
-        process(sigma118, field, 'NeutrinoTaPhotonMTaPair')
+        process(sigma118, field, 'NeutrinoTaPhotonTaPair')
         process(sigma119, field, 'NeutrinoElPhotonUpDown')
         process(sigma120, field, 'NeutrinoMuPhotonUpDown')
         process(sigma121, field, 'NeutrinoTaPhotonUpDown')
