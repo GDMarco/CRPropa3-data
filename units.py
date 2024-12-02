@@ -86,9 +86,49 @@ massWGeV = 80.379
 mWkg = 1.43288582 * 1e-25 #kg
 mW2 = (mWkg*c_light**2.) ** 2 #squared W mass [J^2/c^4]
 
-#mass pion
+#mass charged pion
 massPionGeV = 139.57039e-3 #GeV/c^2
-mass_pion = mWkg * massPionGeV / massWGeV #kg
+mass_charged_pion = mWkg * massPionGeV / massWGeV #kg
+
+#mass charged kaon 
+massKaonGeV = 493.677e-3 #GeV/c^2
+mass_charged_kaon = mWkg * massKaonGeV / massWGeV #kg
+
+# mass neutral pion 
+massNPionGeV = 134.9768e-3 #GeV/c^2
+mass_neutral_pion = mWkg * massNPionGeV / massWGeV #kg
+
+# decay width pi0
+tauNP = 8.43e-17 * second
+widthNP = h_planck / 2 / pi / tauNP
+
+# mass neutral kaon 
+massNKaonGeV = 497.611e-3 #GeV/c^2
+mass_neutral_kaon = mWkg * massNKaonGeV / massWGeV #kg
+
+massQuarkUpGeV = 2.3e-3 #GeV/c^2
+massUpkg = mWkg * massQuarkUpGeV / massWGeV #kg
+mUp2 = (massUpkg*c_light**2.) ** 2 # squared up quark mass [J^2/c^4]
+
+massQuarkDownGeV = 4.8e-3 #GeV/c^2
+massDownkg = mWkg * massQuarkDownGeV / massWGeV #kg
+mDown2 = (massDownkg*c_light**2.) ** 2 # squared up quark mass [J^2/c^4]
+
+massQuarkCharmGeV = 1275e-3 #GeV/c^2
+massCharmkg = mWkg * massQuarkCharmGeV / massWGeV #kg
+mCharm2 = (massCharmkg*c_light**2.) ** 2 # squared up quark mass [J^2/c^4]
+
+massQuarkStrangeGeV = 95e-3 #GeV/c^2
+massStrangekg = mWkg * massQuarkStrangeGeV / massWGeV #kg
+mStrange2 = (massStrangekg*c_light**2.) ** 2 # squared up quark mass [J^2/c^4]
+
+massQuarkTopGeV = 173210e-3 #GeV/c^2
+massTopkg = mWkg * massQuarkTopGeV / massWGeV #kg
+mTop2 = (massTopkg*c_light**2.) ** 2 # squared up quark mass [J^2/c^4]
+
+massQuarkBottomGeV = 4180e-3 #GeV/c^2
+massBottomkg = mWkg * massQuarkBottomGeV / massWGeV #kg
+mBottom2 = (massBottomkg*c_light**2.) ** 2 # squared up quark mass [J^2/c^4]
 
 # gauss
 gauss = 1e-4 * tesla

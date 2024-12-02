@@ -89,7 +89,8 @@ def calculateDensityIntegral(field):
 
     # precalc the photon density integral 
     Emax = field.getEmax()
-    Emin =  1e4 / 4 / 1e23 * eV # min(s_kin) / 4 / max(E_e)
+    Emin =  1e4 / 4 / 1e26 * eV # min(s_kin) / 4 / max(E_e), 
+    #1e26 is the highest E of the gamma-ray/electron, TO be changed according to the process function
     alpha = np.logspace(np.log10(Emin), np.log10(Emax), 10000) # lower boundary of the integral.
 
     # calculate integral

@@ -4,14 +4,18 @@ import interactionRate
 import os
 import gitHelp as gh
 from calc_all import fields_cmbebl, fields_urb
-from units import eV, mass_electron, c_light, sigma_thomson, alpha_finestructure, h_planck
-from units import cm, mass_muon, sigma_thomson_muon, sigma_thomson_tauon,  mass_pion, mass_tauon
+from units import eV, mass_electron, c_light, sigma_thomson, alpha_finestructure, h_planck, second
+from units import cm, mass_muon, sigma_thomson_muon, sigma_thomson_tauon, mass_charged_pion, mass_tauon, mass_charged_kaon, mass_neutral_kaon, mass_neutral_pion
+from units import widthNP
 #import matplotlib.pyplot as plt
 
 me2 = (mass_electron*c_light**2.) ** 2  # squared electron mass [J^2/c^4]
 mm2 = (mass_muon*c_light**2.) ** 2  # squared muon mass [J^2/c^4]
-mp2 = (mass_pion*c_light**2.) ** 2 # squared charged pion mass [J^2/c^4]
+mp2 = (mass_charged_pion*c_light**2.) ** 2 # squared charged pion mass [J^2/c^4]
 mt2 = (mass_tauon*c_light**2) ** 2 # squared tauon mass [J^2/c^4]
+mck2 = (mass_charged_kaon*c_light**2) ** 2
+mnp2 = (mass_neutral_pion*c_light**2) ** 2 
+mnk2 = (mass_neutral_kaon*c_light**2) ** 2
 
 def pbTom2(CSpb):
     pico = 1e-12
@@ -62,7 +66,58 @@ def sigmaCPPP(s):
     y = smin / s
     
     return C * ((1 + y) * np.sqrt(1 - y) - 2 * y * (1 - y / 2) * np.log(np.sqrt(1 / y) + np.sqrt(1 / y - 1)))
+
+def sigmaCKPP(s):
+    """ Charged Kaon Pair production cross section, see Brodsky+ 1971 (Born approximation, for point-like pion) & 2A. I. Akhiezer and V. B.Berestetskii, Quantum Electrodynamics (Interscience, New York, 1965), p. 844. 
+    This expression is smaller by a factor of 2 than that in the book reference [Eq. (60.7), p.844]"""
+    smin = 4 * mck2
+    if (s < smin):
+        return 0.
     
+    # I multiply the cross section by h_planck**2 * c_light**2 / (2.*np.pi)**2 to move to the SI units
+    C = 2 * np.pi * alpha_finestructure*alpha_finestructure * c_light*c_light * h_planck*h_planck / (2.*np.pi) / (2.*np.pi) / s
+    y = smin / s
+    
+    return C * ((1 + y) * np.sqrt(1 - y) - 2 * y * (1 - y / 2) * np.log(np.sqrt(1 / y) + np.sqrt(1 / y - 1))) 
+
+'''
+#the two cross sections for neutral pion and kaon are not correct, they cannot be computed in the Born approximation!
+
+def sigmaNKPP(s):
+    """ Neutral Kaon Pair production cross section, see Brodsky+ 1971 (Born approximation, for point-like pion). """
+    """ Not sure it works!! Maybe they comes from strong interactions"""
+    smin = 4 * mnk2
+    if (s < smin):
+        return 0.
+    
+    # I multiply the cross section by h_planck**2 * c_light**2 / (2.*np.pi)**2 to move to the SI units
+    C = 2 * np.pi * alpha_finestructure*alpha_finestructure * c_light*c_light * h_planck*h_planck / (2.*np.pi) / (2.*np.pi) / s
+    y = smin / s
+    
+    return C * ((1 + y) * np.sqrt(1 - y) - 2 * y * (1 - y / 2) * np.log(np.sqrt(1 / y) + np.sqrt(1 / y - 1)))
+
+def sigmaNPPP(s):
+    """ Neutral Pion Pair production cross section, see Brodsky+ 1971 (Born approximation, for point-like pion). """
+    """Not sure it works!! Maybe they comes from strong interactions"""
+    smin = 4 * mnp2
+    if (s < smin):
+        return 0.
+    
+    # I multiply the cross section by h_planck**2 * c_light**2 / (2.*np.pi)**2 to move to the SI units
+    C = 2 * np.pi * alpha_finestructure*alpha_finestructure * c_light*c_light * h_planck*h_planck / (2.*np.pi) / (2.*np.pi) / s
+    y = smin / s
+    
+    return C * ((1 + y) * np.sqrt(1 - y) - 2 * y * (1 - y / 2) * np.log(np.sqrt(1 / y) + np.sqrt(1 / y - 1)))
+'''
+
+def sigmaNPP(s): # still to implement!
+    """ narrow resonant neutral Pion production cross section, see Brodsky+ 1971 (from QED Lagrangian). 
+         (delta function approximated as a gaussian with width equals to the decay ones)   
+    """
+   
+    # check the units!
+    return 8 * np.pi * np.pi * c_light*c_light * h_planck*h_planck / (2.*np.pi) / (2.*np.pi) / np.sqrt(mnp2) / np.sqrt(2 * np.pi) / widthNP * np.exp(-(mnp2 - s)**2 / 2 / widthNP ** 4)
+
 def sigmaDPP(s):
     """ Double-pair production cross section, see R.W. Brown eq. (4.5) with k^2 = q^2 = 0 """
     smin = 16 * me2
@@ -117,7 +172,7 @@ def sigmaEMPP(s):
 
 def getTabulatedXS(sigma, skin):
     """ Get crosssection for tabulated s_kin """
-    if sigma in (sigmaPP, sigmaDPP, sigmaMPP, sigmaCPPP, sigmaTauPP):  # photon interactions
+    if sigma in (sigmaPP, sigmaDPP, sigmaMPP, sigmaCPPP, sigmaTauPP, sigmaCKPP):  # photon interactions
         return np.array([sigma(s) for s in skin])
     if sigma in (sigmaTPP, sigmaICS, sigmaEMPP):  # electron interactions
         return np.array([sigma(s) for s in skin + me2])
@@ -132,7 +187,8 @@ def getSmin(sigma):
             sigmaDPP: 16 * me2,
             sigmaTPP: np.exp((218 / 27) / (28 / 9)) * me2 - me2,
             sigmaICS: 1e-40 * me2, 
-            sigmaEMPP: (np.sqrt(me2) + 2. * np.sqrt(mm2)) ** 2
+            sigmaEMPP: (np.sqrt(me2) + 2. * np.sqrt(mm2)) ** 2, 
+            sigmaCKPP: 4 * mck2
             }[sigma]
 
 
@@ -157,7 +213,7 @@ def process(sigma, field, name):
 
     # tabulated energies, limit to energies where the interaction is possible
     Emin = getEmin(sigma, field)
-    E = np.logspace(9, 26, 281) * eV
+    E = np.logspace(8, 26, 281) * eV
     E = E[E > Emin]
     
     # -------------------------------------------
@@ -165,7 +221,7 @@ def process(sigma, field, name):
     # -------------------------------------------
     # tabulated values of s_kin = s - mc^2
     # Note: integration method (Romberg) requires 2^n + 1 log-spaced tabulation points
-    s_kin = np.logspace(4, 25, 2 ** 18 + 1) * eV**2 # smax was 23
+    s_kin = np.logspace(4, 26, 2 ** 18 + 1) * eV**2 # smax was 23
     xs = getTabulatedXS(sigma, s_kin)
     rate = interactionRate.calc_rate_s(s_kin, xs, E, field)
 
@@ -193,14 +249,14 @@ def process(sigma, field, name):
 
     # tabulated values of s_kin = s - mc^2, limit to relevant range
     # Note: use higher resolution and then downsample
-    skin = np.logspace(4, 25, 380000 + 1) * eV**2 # smax was 23
+    skin = np.logspace(4, 26, 380000 + 1) * eV**2 # smax was 23
     skin = skin[skin > skin_min]
 
     xs = getTabulatedXS(sigma, skin)
     rate = interactionRate.calc_rate_s(skin, xs, E, field, cdf=True)
 
     # downsample
-    skin_save = np.logspace(4, 25, 190 + 1) * eV**2 # smax was 23
+    skin_save = np.logspace(4, 26, 190 + 1) * eV**2 # smax was 23
     skin_save = skin_save[skin_save > skin_min]
     rate_save = np.array([np.interp(skin_save, skin, r) for r in rate])
 
@@ -227,11 +283,12 @@ if __name__ == "__main__":
 
     for field in fields_cmbebl+fields_urb:
         print(field.name)
-        #process(sigmaPP, field, 'EMPairProduction')
-        #process(sigmaMPP, field, 'EMMuonPairProduction')
+        process(sigmaPP, field, 'EMPairProduction')
+        process(sigmaMPP, field, 'EMMuonPairProduction')
         process(sigmaTauPP, field, 'EMTauonPairProduction')
-        #process(sigmaCPPP, field, 'EMChargedPionPairProduction')
-        #process(sigmaEMPP, field, 'EMElectronMuonPairProduction')
-        #process(sigmaDPP, field, 'EMDoublePairProduction')
-        #process(sigmaTPP, field, 'EMTripletPairProduction')
-        #process(sigmaICS, field, 'EMInverseComptonScattering')
+        process(sigmaCPPP, field, 'EMChargedPionPairProduction')
+        process(sigmaCKPP, field, 'EMChargedKaonPairProduction')
+        process(sigmaEMPP, field, 'EMElectronMuonPairProduction')
+        process(sigmaDPP, field, 'EMDoublePairProduction')
+        process(sigmaTPP, field, 'EMTripletPairProduction')
+        process(sigmaICS, field, 'EMInverseComptonScattering')
