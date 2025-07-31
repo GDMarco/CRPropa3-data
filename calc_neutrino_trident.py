@@ -332,8 +332,7 @@ def sigma121(s):
     if (s < smin):
         return 0.
     
-    processFile = 'SigmaIncl_Ecms_channel121_s1
-    .txt'
+    processFile = 'SigmaIncl_Ecms_channel121_s1.txt'
     Ecms2, sigma = getTables(dataPath, processFile)
     
     interpFunc = interp1d(Ecms2, sigma)

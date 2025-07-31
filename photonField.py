@@ -76,15 +76,15 @@ class CMB(PhotonField):
         Comoving spectral number density dn/deps [1/m^3/J] at given photon energy eps [J] and redshift z.
         Multiply with (1+z)^3 for the physical number density.
         """
-        return 8*np.pi / c_light**3 / h_planck**3 * eps**2 / np.expm1(eps / (k_boltzmann * self.T_CMB)) 
+        return 8*np.pi / c_light**3 / h_planck**3 * eps**2 / np.expm1(eps / (k_boltzmann * self.T_CMB * (1 + z))) #* (1 + z) * (1 + z) * (1 + z) 
 
     def getEmin(self, z=0):
         """Minimum effective photon energy in [J]"""
-        return 1e-10 * eV
+        return 1e-10 * (1 + z) * eV
 
     def getEmax(self, z=0):
         """Maximum effective photon energy in [J]"""
-        return 0.1 * eV
+        return 0.1 * (1 + z) * eV
 
 
 class EBL(PhotonField):

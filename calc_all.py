@@ -6,6 +6,11 @@ import neutrinoField
 # Field list used in the default CRPropa tar-ball
 # imported in calc_* files therefore the have to be 
 # defined before other import statements.
+
+cmb = [
+	photonField.CMB()
+     ]
+
 reduced_fields = [
         photonField.CMB(),
         photonField.EBL_Saldana21(),
@@ -37,6 +42,12 @@ fields_urb = [
 
 fields_CnuB = [
         neutrinoField.CnuB() 
+    ]
+
+fields_massiveCnuB = [
+        neutrinoField.CnuB_m3(),
+        neutrinoField.CnuB_m2(), 
+        neutrinoField.CnuB_m1()
     ]
 
 import calc_elasticscattering as es

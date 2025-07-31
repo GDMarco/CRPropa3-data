@@ -132,7 +132,7 @@ ccm = cm*cm*cm
 
 # constants to implement neutrino-neutrino cross section
 
-me2 = (mass_electron*c_light**2.) ** 2  # squared electron mass [J^2/c^4]
+me2 = (mass_electron*c_light**2.) ** 2  # squared electron mass [J^2]!!! not [J^2/c^4]
 sigmaThomson = 6.6524e-29  # Thomson cross section [m^2]
 alpha = 1 / 137.035999074  # fine structure constant
 
@@ -174,7 +174,7 @@ massQuarkBottomGeV = 4180e-3 #GeV/c^2
 massBottomkg = mWkg * massQuarkBottomGeV / massWGeV #kg
 mBottom2 = (massBottomkg*c_light**2.) ** 2 # squared up quark mass [J^2/c^4]
 
-massNuGeV = 0.1*1e-9 #GeV/c^2
+massNuGeV = 0.022e-9 #GeV/c^2
 massNukg = mWkg * massNuGeV / massWGeV
 mNu2 = (massNukg*c_light**2.) ** 2 # squared neutrino mass [J^2/c^4]
  

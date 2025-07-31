@@ -4,8 +4,8 @@ import interactionRate
 import os
 import gitHelp as gh
 import math
-from crpropa import eV, mass_electron, c_light, h_planck, GeV
-from calc_all import reduced_fields, fields_CnuB
+from crpropa import eV, mass_electron, c_light, h_planck, GeV, c_squared, cm
+from calc_all import reduced_fields, fields_CnuB, fields_massiveCnuB, cmb
 from units import me2, sigmaThomson, alpha, mm2, mt2, mW2, mZ2, mUp2, mDown2
 from units import mCharm2, mStrange2, mBottom2, mTop2, mNu2, Gf, gammaZ2, sW2
 
@@ -381,25 +381,98 @@ def getTabulatedXS(sigma, skin):
                  sigmaNuiNuxjWTaElx,
                  sigmaNuiNuxjWTaMux, sigmaNuiNuxjZel,
                  sigmaNuNuxWProd, sigmaNuNuxZProd):  
-            # neutrino-neutrino interaction
+        # neutrino-neutrino interaction
         return np.array([sigma(s) for s in skin + 4.*mNu2 ])
+    return False
+
+def getTabulatedEffectiveXS(sigma, skin, mass, field):
+    """ Get cross section for tabulated s_kin for massive propagating neutrinos interacting with massive neutrino background."""
+    if sigma in (sigmaNuElGamma, sigmaNuMuGamma, sigmaNuTauGamma):
+        # photon-neutrino interaction
+        return np.array([sigma(s) for s in skin + mass * mass * c_squared * c_squared])
+    if sigma in (sigmaNuNuel, sigmaNuNuxWZEl,
+                 sigmaNuNuxWZMu,
+                 sigmaNuNuxWZTa, sigmaNuiNujZel, 
+                 sigmaNuNuxZel, sigmaNuNuxZresEl,
+                 sigmaNuNuxZresMu, 
+                 sigmaNuNuxZresTa,
+                 sigmaNuNuxZresUp,
+                 sigmaNuNuxZresDown,
+                 sigmaNuNuxZresCharm,
+                 sigmaNuNuxZresStrange,
+                 sigmaNuNuxZresTop,
+                 sigmaNuNuxZresBottom, sigmaNuiNuxjWElMux,
+                 sigmaNuiNuxjWElTax,
+                 sigmaNuiNuxjWMuElx,
+                 sigmaNuiNuxjWMuTax,
+                 sigmaNuiNuxjWTaElx,
+                 sigmaNuiNuxjWTaMux, sigmaNuiNuxjZel,
+                 sigmaNuNuxWProd, sigmaNuNuxZProd):  
+        # neutrino-neutrino interaction
+        return np.array([sigma(s) for s in skin + (mass * mass + field.mass * field.mass) * c_squared * c_squared])
     return False
 
 def getSmin(sigma):
     """ Return minimum required s_kin = s - (mc^2)^2 for interaction """
 
     return {
+            
             sigmaNuElGamma: (np.sqrt(mW2)+np.sqrt(me2))**2,
             sigmaNuMuGamma: (np.sqrt(mW2)+np.sqrt(mm2))**2,
             sigmaNuTauGamma: (np.sqrt(mW2)+np.sqrt(mt2))**2,
             
-            sigmaNuNuel: 4.*mNu2, 
-            sigmaNuiNujZel: 4.*mNu2, 
-            sigmaNuNuxWProd: 4.*mW2,
-            sigmaNuNuxZProd: 4.*mZ2,
+            #'''
             sigmaNuNuxZel: 4.*mNu2,
             sigmaNuiNuxjZel: 4.*mNu2,
+            sigmaNuNuel: 4.*mNu2, 
+            sigmaNuiNujZel: 4.*mNu2,
+        
+            sigmaNuNuxWProd: 4.*mW2,
+            sigmaNuNuxZProd: 4.*mZ2,
+            sigmaNuNuxWZEl: 4.*me2,
+            sigmaNuNuxWZMu: 4.*mm2,
+            sigmaNuNuxWZTa: 4.*mt2,
             
+            sigmaNuNuxZresEl: 4.*me2,
+            sigmaNuNuxZresMu: 4.*mm2,
+            sigmaNuNuxZresTa: 4.*mt2,
+            sigmaNuNuxZresUp: 4.*mUp2,
+            sigmaNuNuxZresDown: 4.*mDown2,
+            sigmaNuNuxZresCharm: 4.*mCharm2,
+            sigmaNuNuxZresStrange: 4.*mStrange2,
+            sigmaNuNuxZresTop: 4.*mTop2,
+            sigmaNuNuxZresBottom: 4.*mBottom2,
+            
+            sigmaNuiNuxjWElMux: (np.sqrt(me2) + np.sqrt(mm2))**2.,
+            sigmaNuiNuxjWElTax: (np.sqrt(me2) + np.sqrt(mt2))**2.,
+            sigmaNuiNuxjWMuElx: (np.sqrt(me2) + np.sqrt(mm2))**2.,
+            sigmaNuiNuxjWMuTax: (np.sqrt(mt2) + np.sqrt(mm2))**2.,
+            sigmaNuiNuxjWTaElx: (np.sqrt(me2) + np.sqrt(mt2))**2.,
+            sigmaNuiNuxjWTaMux: (np.sqrt(mt2) + np.sqrt(mm2))**2.
+            #'''
+            }[sigma]
+
+def getEffectiveSmin(sigma, mass, field):
+    """ Return minimum required s_kin = s - (mc^2)^2 for interaction, for interacting massive neutrinos """
+    
+    if field.name == 'CMB':  # to extend to all the photon backgrounds
+        fieldMass = 0 
+    else: 
+        fieldMass = field.mass
+    
+    return {
+               
+            sigmaNuNuxZel: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared,
+            sigmaNuiNuxjZel: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared,
+            sigmaNuNuel: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared, 
+            sigmaNuiNujZel: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared,
+        
+            sigmaNuElGamma: (np.sqrt(mW2)+np.sqrt(me2))**2,
+            sigmaNuMuGamma: (np.sqrt(mW2)+np.sqrt(mm2))**2,
+            sigmaNuTauGamma: (np.sqrt(mW2)+np.sqrt(mt2))**2,
+            
+            sigmaNuNuxWProd: 4.*mW2,
+            sigmaNuNuxZProd: 4.*mZ2,
             sigmaNuNuxWZEl: 4.*me2,
             sigmaNuNuxWZMu: 4.*mm2,
             sigmaNuNuxWZTa: 4.*mt2,
@@ -423,11 +496,19 @@ def getSmin(sigma):
              
             }[sigma]
 
-def getEmin(sigma, field, s_kin):
+def getEmin(sigma, field, z=0):
     """ Return minimum required cosmic ray energy for interaction *sigma* with *field* """
-    return getSmin(sigma) / 4 / field.getEmax()
+    return getSmin(sigma) / 4 / field.getEmax(z=z)
 
-def process(sigma, field, name):
+def getEmin_massiveBackground(sigma, mass, field, z=0):
+    """ Return minimum required (massive) neutrino energy for interaction *sigma* with *field* of (massive) neutrinos"""
+    
+    if (field.name == 'CMB'):   # to generalise to all the photon fields 
+        return getEffectiveSmin(sigma, mass, field) / 4 / field.getEmax(z=z)
+    else:
+        return getEffectiveSmin(sigma, mass, field) * 0.5 / (np.sqrt(field.getPmax(z=z)**2 * c_squared + field.mass * field.mass * c_squared * c_squared) + c_light * field.getPmax(z=z))
+
+def process(sigma, field, name, z):
     """ 
         calculate the interaction rates for a given process on a given photon field 
 
@@ -436,10 +517,10 @@ def process(sigma, field, name):
         name  : name of the process which will be calculated. Necessary for the naming of the data folder
     """
     
-    folder = 'data/NeutrinoInteractions/' + name
+    folder = f'data/NeutrinoInteractionsRedshift{z:.2f}massless/{name}'
+    
     if not os.path.exists(folder):
         os.makedirs(folder)
-
     
     # -------------------------------------------
     # calculate interaction rates
@@ -450,11 +531,14 @@ def process(sigma, field, name):
     xs = getTabulatedXS(sigma, s_kin)
     
     # tabulated energies, limit to energies where the interaction is possible
-    Emin = getEmin(sigma, field, s_kin)
-    E = np.logspace(10, 27, 281) * eV 
+    Emin = getEmin(sigma, field, z=z)
+    E = np.logspace(10, 27, 1000) * eV 
     E = E[E > Emin]
     
-    rate = interactionRate.calc_rate_s(s_kin, xs, E, field)
+    EmineV = Emin / eV
+    print("Emin (eV): " + f"{EmineV:.2e}")
+    
+    rate = interactionRate.calc_rate_s(s_kin, xs, E, field, z=z)
 
     # save
     fname = folder + '/rate_%s.txt' % field.name
@@ -477,16 +561,19 @@ def process(sigma, field, name):
     skin1 = getSmin(sigma)  # s threshold for interaction
     
     # both fields are considered relativistic
-    skin2 = 4 * field.getEmin() * E[0]  # minimum achievable s in collision with background neutrino (at any tabulated E)
+    skin2 = 4 * field.getEmin(z=z) * E[0]  # minimum achievable s in collision with background neutrino (at any tabulated E)
     skin_min = max(skin1, skin2)
 
     # tabulated values of s_kin = s - mc^2, limit to relevant range
     # Note: use higher resolution and then downsample
     skin = np.logspace(4, 28, 380000 + 1) * eV**2 
-    skin = skin[skin > skin_min]
+    skin = skin[skin > skin_min] 
 
     xs = getTabulatedXS(sigma, skin)
-    rate = interactionRate.calc_rate_s(skin, xs, E, field, cdf=True)
+    rate = interactionRate.calc_rate_s(skin, xs, E, field, z=z, cdf=True)
+
+    print("rate shape: ", rate.shape)
+    print("max/min final rate (Mpc^-1): ", np.max(rate), np.min(rate))
 
     # downsample
     skin_save = np.logspace(4, 28, 190 + 1) * eV**2 
@@ -511,46 +598,305 @@ def process(sigma, field, name):
     np.savetxt(fname, data, fmt=fmt, header=header)
 
     del data, rate, skin, skin_save, rate_save
+    
+def process_photonBackground(sigma, mass, field, name, z=0):
+    """ 
+        calculate the interaction rates for a given process on a given photon field 
 
+        sigma : crossection (function) of the NuNu-process
+        mass : mass of the propagating neutrino (kg)
+        field : neutrino field as defined in neutrinoField.py
+        name  : name of the process which will be calculated. Necessary for the naming of the data folder
+    """
+    
+    folder = f'dataOff/NeutrinoInteractions/{name}/'
+    
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    
+    # -------------------------------------------
+    # calculate interaction rates
+    # -------------------------------------------
+    # tabulated values of s_kin = s - mc^2
+    # Note: integration method (Romberg) requires 2^n + 1 log-spaced tabulation points
+    s_kin = np.logspace(4, 28, 2 ** 18 + 1) * eV**2  
+    xs = getTabulatedEffectiveXS(sigma, s_kin, mass, field)
+    
+    # tabulated energies, limit to energies where the interaction is possible
+    Emin = getEmin_massiveBackground(sigma, mass, field, z)
+    E = np.logspace(10, 27, 500) * eV 
+    E = E[E > Emin]
+    
+    EmineV = Emin / eV
+    print("Emin (eV): " + f"{EmineV:.2e}")
+    
+    rate = interactionRate.calc_rate_s(s_kin, xs, E, field, z=z)
+
+    masseV = mass / eV * c_light * c_light
+    tol = 1e-4
+
+    if abs(masseV - 0) < tol:
+        massNu = "m1"
+    elif abs(masseV - 8.6e-3) < tol:
+        massNu = "m2"
+    elif abs(masseV - 50e-3) < tol:
+        massNu = "m3"
+
+    # save
+    fname = folder + '/rate_%s_%s.txt' % (field.name, massNu) # _z%.1f , z)
+    data = np.c_[np.log10(E / eV), rate]
+    fmt = '%.2f\t%8.7e'
+    try:
+        git_hash = gh.get_git_revision_hash()
+        header = ("%s interaction rates\nneutrino field: %s\n"% (name, field.info)
+                  +"Produced with crpropa-data version: "+git_hash+"\n"
+                  +"log10(E/eV), 1/lambda [1/Mpc]" )
+    except:
+        header = ("%s interaction rates\nneutrino field: %s\n"% (name, field.info)
+                  +"log10(E/eV), 1/lambda [1/Mpc]")
+    np.savetxt(fname, data, fmt=fmt, header=header)
+
+    # -------------------------------------------
+    # calculate cumulative differential interaction rates for sampling s values
+    # -------------------------------------------
+    # find minimum value of s_kin
+    skin1 = getEffectiveSmin(sigma, mass, field)  # s threshold for interaction
+    
+    # both fields are considered relativistic
+    skin2 = 4 * field.getEmin(z=z) * E[0]  # minimum achievable s in collision with background photon (at any tabulated E)
+    skin_min = max(skin1, skin2)
+
+    # tabulated values of s_kin = s - mc^2, limit to relevant range
+    # Note: use higher resolution and then downsample
+    skin = np.logspace(4, 28, 380000 + 1) * eV**2 
+    skin = skin[skin > skin_min] 
+
+    xs = getTabulatedXS(sigma, skin)
+    rate = interactionRate.calc_rate_s(skin, xs, E, field, z=z, cdf=True)
+
+    print("rate shape: ", rate.shape)
+    print("max/min final rate (Mpc^-1): ", np.max(rate), np.min(rate))
+
+    # downsample
+    skin_save = np.logspace(4, 28, 390 + 1) * eV**2 
+    skin_save = skin_save[skin_save > skin_min] 
+    rate_save = np.array([np.interp(skin_save, skin, r) for r in rate])
+
+    # save
+    data = np.c_[np.log10(E / eV), rate_save]  # prepend log10(E/eV) as first column
+    row0 = np.r_[0, np.log10(skin_save / eV**2)][np.newaxis]
+    data = np.r_[row0, data]  # prepend log10(s_kin/eV^2) as first row
+
+    fname = folder + '/cdf_%s_%s.txt' % (field.name, massNu) #_z%.1f , z)
+    fmt = '%.2f' + '\t%6.5e' * np.shape(rate_save)[1]
+    try:
+        git_hash = gh.get_git_revision_hash()
+        header = ("%s cumulative differential rate\nphoton field: %s\n"% (name, field.info)
+                  +"Produced with crpropa-data version: "+git_hash+"\n"
+                  +"log10(E/eV), d(1/lambda)/ds_kin [1/Mpc/eV^2] for log10(s_kin/eV^2) as given in first row" )
+    except:
+        header = ("%s cumulative differential rate\nphoton field: %s\n"% (name, field.info)
+                  +"log10(E/eV), d(1/lambda)/ds_kin [1/Mpc/eV^2] for log10(s_kin/eV^2) as given in first row")
+    np.savetxt(fname, data, fmt=fmt, header=header)
+
+    del data, rate, skin, skin_save, rate_save
+
+
+def process_massiveBackground(sigma, mass, field, name, z):
+    """ 
+        calculate the interaction rates for a given process on a given photon field 
+
+        sigma : crossection (function) of the NuNu-process
+        mass : mass of the propagating neutrino (in kg!)
+        field : neutrino field as defined in neutrinoField.py
+        name  : name of the process which will be calculated. Necessary for the naming of the data folder
+    """
+    
+    folder = f'dataOff/NeutrinoInteractions/{name}/'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    # -------------------------------------------
+    # calculate interaction rates
+    # -------------------------------------------
+    # tabulated values of s_kin = s - mc^2
+    # Note: integration method (Romberg) requires 2^n + 1 log-spaced tabulation points
+    s_kin = np.logspace(4, 28, 2 ** 18 + 1) * eV**2  
+    xs = getTabulatedEffectiveXS(sigma, s_kin, mass, field)
+    
+    # tabulated energies, limit to energies where the interaction is possible
+    Emin = getEmin_massiveBackground(sigma, mass, field, z=z)    
+    EmineV = Emin / eV
+    
+    E = np.logspace(10, 27, 500) * eV  # to have higher resolution at the peak 
+    E = E[E > Emin]
+    
+    rate = interactionRate.calc_rate_s_momenta(s_kin, xs, E, mass, field, z=z)
+
+    masseV = mass / eV * c_light * c_light
+    tol = 1e-4
+
+    if abs(masseV - 0) < tol:
+        massNu = "m1"
+    elif abs(masseV - 8.6e-3) < tol:
+        massNu = "m2"
+    elif abs(masseV - 50e-3) < tol:
+        massNu = "m3"
+        
+    # save
+    fname = folder + '/rate_%s_%s_z%.1f.txt' % (field.name, massNu, z) 
+    data = np.c_[np.log10(E / eV), rate]
+    fmt = '%.2f\t%8.7e'
+    try:
+        git_hash = gh.get_git_revision_hash()
+        header = ("%s interaction rates\nneutrino field: %s\n"% (name, field.info)
+                  +"Produced with crpropa-data version: "+git_hash+"\n"
+                  +"log10(E/eV), 1/lambda [1/Mpc]" )
+    except:
+        header = ("%s interaction rates\nneutrino field: %s\n"% (name, field.info)
+                  +"log10(E/eV), 1/lambda [1/Mpc]")
+    np.savetxt(fname, data, fmt=fmt, header=header)
+
+    # -------------------------------------------
+    # calculate cumulative differential interaction rates for sampling s values
+    # -------------------------------------------
+    # find minimum value of s_kin
+    skin1 = getEffectiveSmin(sigma, mass, field)  # s threshold for interaction
+    print("skin1 (eV**2): ", skin1 / eV**2)
+    # both fields are considered relativistic
+    # minimum achievable s in collision with background neutrino (at any tabulated E), setting the interaction angle to pi
+    skin2 = 2 * E[0] * (np.sqrt((field.getPmin() * c_light) ** 2 + (field.mass * c_squared) ** 2) + field.getPmin() * c_light)  
+    print("skin2 (eV**2): ", skin2 / eV**2)
+    skin_min = max(skin1, skin2)
+    print("skin_min (eV**2): ", skin_min / eV**2)
+    
+    # tabulated values of s_kin = s - mc^2, limit to relevant range
+    # Note: use higher resolution and then downsample
+    skin = np.logspace(4, 28, 380000 + 1) * eV**2 
+    skin = skin[skin > skin_min] 
+
+    xs = getTabulatedXS(sigma, skin)
+    rate = interactionRate.calc_rate_s_momenta(skin, xs, E, mass, field, z=z, cdf=True)
+
+    # downsample
+    skin_save = np.logspace(4, 28, 390 + 1) * eV**2 
+    skin_save = skin_save[skin_save > skin_min] 
+    rate_save = np.array([np.interp(skin_save, skin, r) for r in rate])
+
+    # save
+    data = np.c_[np.log10(E / eV), rate_save]  # prepend log10(E/eV) as first column
+    row0 = np.r_[0, np.log10(skin_save / eV**2)][np.newaxis]
+    data = np.r_[row0, data]  # prepend log10(s_kin/eV^2) as first row
+
+    fname = folder + '/cdf_%s_%s_z%.1f.txt' % (field.name, massNu, z) 
+    fmt = '%.2f' + '\t%6.5e' * np.shape(rate_save)[1]
+    try:
+        git_hash = gh.get_git_revision_hash()
+        header = ("%s cumulative differential rate\nphoton field: %s\n"% (name, field.info)
+                  +"Produced with crpropa-data version: "+git_hash+"\n"
+                  +"log10(E/eV), d(1/lambda)/ds_kin [1/Mpc/eV^2] for log10(s_kin/eV^2) as given in first row" )
+    except:
+        header = ("%s cumulative differential rate\nphoton field: %s\n"% (name, field.info)
+                  +"log10(E/eV), d(1/lambda)/ds_kin [1/Mpc/eV^2] for log10(s_kin/eV^2) as given in first row")
+    np.savetxt(fname, data, fmt=fmt, header=header)
+
+    del data, rate, skin, skin_save, rate_save
+
+'''
 if __name__ == "__main__":
-
-    for field in reduced_fields:
-        print(field.name)
-        process(sigmaNuElGamma, field, 'NeutrinoElectronPhotonInteraction')
-        process(sigmaNuMuGamma, field, 'NeutrinoMuonPhotonInteraction')
-        process(sigmaNuTauGamma, field, 'NeutrinoTauPhotonInteraction')
     
     for field in fields_CnuB:
         print(field.name)
-        process(sigmaNuNuel, field, 'NeutrinoNeutrinoElastic')
-        process(sigmaNuiNujZel, field, 'NeutrinoiNeutrinojElastic')
-        process(sigmaNuNuxWProd, field, 'NeutrinoAntineutrinoWProduction')
-        process(sigmaNuNuxZProd, field, 'NeutrinoAntineutrinoZProduction')
-        process(sigmaNuNuxZel, field, 'NeutrinoAntineutrinoElastic')
-        process(sigmaNuiNuxjZel, field, 'NeutrinoiAntineutrinojElastic')
         
-        process(sigmaNuNuxWZEl, field, 'NeutrinoAntineutrinoElectron')
-        process(sigmaNuNuxWZMu, field, 'NeutrinoAntineutrinoMuon')
-        process(sigmaNuNuxWZTa, field, 'NeutrinoAntineutrinoTau')
+        process(sigmaNuNuel, field, 'NeutrinoNeutrinoInteraction/NeutrinoNeutrinoElastic', z)
+        process(sigmaNuiNujZel, field, 'NeutrinoNeutrinoInteraction/NeutrinoiNeutrinojElastic', z)
+        process(sigmaNuNuxWProd, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoWProduction', z)
+        process(sigmaNuNuxZProd, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoZProduction', z)
+        process(sigmaNuNuxZel, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoElastic', z)
+        process(sigmaNuiNuxjZel, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojElastic', z)
         
-        process(sigmaNuNuxZresEl, field, 'NeutrinoAntineutrinoResonanceElectron')
-        process(sigmaNuNuxZresMu, field, 'NeutrinoAntineutrinoResonanceMuon')
-        process(sigmaNuNuxZresTa, field, 'NeutrinoAntineutrinoResonanceTau')
-        process(sigmaNuNuxZresUp, field, 'NeutrinoAntineutrinoResonanceUp')
-        process(sigmaNuNuxZresDown, field, 'NeutrinoAntineutrinoResonanceDown')
-        process(sigmaNuNuxZresCharm, field, 'NeutrinoAntineutrinoResonanceCharm')
-        process(sigmaNuNuxZresStrange, field, 'NeutrinoAntineutrinoResonanceStrange')
-        process(sigmaNuNuxZresTop, field, 'NeutrinoAntineutrinoResonanceTop')
-        process(sigmaNuNuxZresBottom, field, 'NeutrinoAntineutrinoResonanceBottom')
+        process(sigmaNuNuxWZEl, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoElectron', z)
+        process(sigmaNuNuxWZMu, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoMuon', z)
+        process(sigmaNuNuxWZTa, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoTau', z)
         
-        process(sigmaNuiNuxjWElMux, field, 'NeutrinoiAntineutrinojElectronAntimuon')
-        process(sigmaNuiNuxjWElTax, field, 'NeutrinoiAntineutrinojElectronAntitau')
-        process(sigmaNuiNuxjWMuElx, field, 'NeutrinoiAntineutrinojMuonAntielectron')
-        process(sigmaNuiNuxjWMuTax, field, 'NeutrinoiAntineutrinojMuonAntitau')
-        process(sigmaNuiNuxjWTaElx, field, 'NeutrinoiAntineutrinojTauAntielectron')
-        process(sigmaNuiNuxjWTaMux, field, 'NeutrinoiAntineutrinojTauAntimuon')
+        process(sigmaNuNuxZresEl, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceElectron', z)
+        process(sigmaNuNuxZresMu, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceMuon', z)
+        process(sigmaNuNuxZresTa, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceTau', z)
+        process(sigmaNuNuxZresUp, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceUp', z)
         
+        process(sigmaNuNuxZresDown, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceDown', z)
+        process(sigmaNuNuxZresCharm, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceCharm', z)
+        process(sigmaNuNuxZresStrange, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceStrange', z)
+        process(sigmaNuNuxZresTop, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceTop', z)
+        process(sigmaNuNuxZresBottom, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceBottom', z)
         
+        process(sigmaNuiNuxjWElMux, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojElectronAntimuon', z)
+        process(sigmaNuiNuxjWElTax, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojElectronAntitau', z)
+        process(sigmaNuiNuxjWMuElx, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojMuonAntielectron', z)
+        process(sigmaNuiNuxjWMuTax, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojMuonAntitau', z)
+        process(sigmaNuiNuxjWTaElx, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojTauAntielectron', z)
+        process(sigmaNuiNuxjWTaMux, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojTauAntimuon', z)
+'''    
+
+
+masses = np.array([0, 8.6, 50]) * 1e-3 * eV / c_light / c_light
+redshifts = np.array([0, 2, 5, 8, 11, 15, 20, 25, 30, 40, 50])
+
+# the CMB does not change with the redshift, naive scaling of the field and the IMFP
+if __name__ == "__main__":
+    
+    for field in cmb: #reduced_fields:
+        for mass in masses:
+            '''
+            print(field.name)
+            process_photonBackground(sigmaNuElGamma, mass, field, 'NeutrinoPhotonInteraction/NeutrinoElectronPhotonInteraction')
+            process_photonBackground(sigmaNuMuGamma, mass, field, 'NeutrinoPhotonInteraction/NeutrinoMuonPhotonInteraction')
+            process_photonBackground(sigmaNuTauGamma, mass, field, 'NeutrinoPhotonInteraction/NeutrinoTauPhotonInteraction')
+            '''
+
+if __name__ == "__main__":
+    
+    for z in redshifts:
+        for field in fields_massiveCnuB:   
+            for mass in masses:
+            
+                print(field.name)
+                '''
+                process_massiveBackground(sigmaNuNuel, mass, field, 'NeutrinoNeutrinoInteraction/NeutrinoNeutrinoElastic', z)
+                process_massiveBackground(sigmaNuiNujZel, mass, field, 'NeutrinoNeutrinoInteraction/NeutrinoiNeutrinojElastic', z)
+                '''
+                '''
+                process_massiveBackground(sigmaNuNuxWProd, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoWProduction', z)    
+                process_massiveBackground(sigmaNuNuxZProd, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoZProduction', z)
+                process_massiveBackground(sigmaNuNuxZel, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoElastic', z)
+                '''
+                process_massiveBackground(sigmaNuiNuxjZel, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojElastic', z)
+                '''
+                process_massiveBackground(sigmaNuNuxWZEl, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoElectron', z)
+                process_massiveBackground(sigmaNuNuxWZMu, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoMuon', z)
+                process_massiveBackground(sigmaNuNuxWZTa, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoTau', z)
+                '''
+                process_massiveBackground(sigmaNuNuxZresEl, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceElectron', z)
+                '''
+                process_massiveBackground(sigmaNuNuxZresMu, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceMuon', z)
+                
+                process_massiveBackground(sigmaNuNuxZresTa, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceTau', z)
+                process_massiveBackground(sigmaNuNuxZresUp, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceUp', z) 
+                process_massiveBackground(sigmaNuNuxZresDown, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceDown', z)
+                process_massiveBackground(sigmaNuNuxZresCharm, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceCharm', z)
+                process_massiveBackground(sigmaNuNuxZresStrange, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceStrange', z)
+                process_massiveBackground(sigmaNuNuxZresTop, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceTop', z)
+                process_massiveBackground(sigmaNuNuxZresBottom, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceBottom', z)
+                
+                process_massiveBackground(sigmaNuiNuxjWElMux, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojElectronAntimuon', z)
+                process_massiveBackground(sigmaNuiNuxjWElTax, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojElectronAntitau', z)
+                process_massiveBackground(sigmaNuiNuxjWMuElx, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojMuonAntielectron', z)
+                process_massiveBackground(sigmaNuiNuxjWMuTax, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojMuonAntitau', z)
+                process_massiveBackground(sigmaNuiNuxjWTaElx, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojTauAntielectron', z)
+                process_massiveBackground(sigmaNuiNuxjWTaMux, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojTauAntimuon', z)
+                '''
+        
+ 
         
         
         
