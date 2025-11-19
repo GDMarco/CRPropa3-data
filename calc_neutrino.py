@@ -162,9 +162,9 @@ def sigmaNuNuxZresBottom(s):
 
 def sigmaNuiNuxjZel(s):
     """Neutrino_i-(anti)neutrino_j Z-exchange t-channel interaction cross section, see Roulet (1992) Eq. 2.2"""
-    smin = 4.*mNu2
-    if (s < smin):
-        return 0.
+    #smin = 4.*mNu2
+    #if (s < smin):
+    #    return 0.
     
     sthr = 5e15 * eV * eV
     F1val = F1exp0(mZ2, s, sthr)
@@ -173,9 +173,9 @@ def sigmaNuiNuxjZel(s):
 def sigmaNuNuxZel(s):
     """Neutrino-(anti)neutrino interaction Z-exchange interaction cross section, see Roulet (1992) Eq. 2.3"""
     
-    smin = mNu2
-    if (s < smin):
-        return 0.
+    #smin = mNu2
+    #if (s < smin):
+    #    return 0.
     
     Pz = mZ2*mZ2 / ((s-mZ2)**2+gammaZ2*mZ2) 
     
@@ -254,7 +254,7 @@ def sigmaNuiNuxjWTaMux(s):
 def sigmaNuNuxWZEl(s): 
     """Neutrino-(anti)neutrino interaction cross section, see Roulet (1992) Eq. 2.5, INTERFERENCE OF Eq. 2.1 and Eq. 2.5"""
     
-    smin = mZ2
+    smin = mZ2 # to check it! 
     if (s < smin):
         return 0.
     
@@ -302,6 +302,55 @@ def sigmaNuNuxZProd(s):
     
     return Gf*Gf/math.pi/h_planck/h_planck/c_light/c_light*(2.*math.pi)*(2.*math.pi)*mZ2*beta/(y-2)*(2./y-1.+(4.+y*y)/2./y/y/beta*L)
 
+
+def sigma_ZZ_incl_Rhorry(s_joule2):
+    
+    smin = 4.*mZ2
+    if (s_joule2 < smin):
+        return 0.
+    
+    # constants (redifined)
+    GeV_to_J = 1.602176634e-10       # J per GeV
+    pb_to_m2 = 1e-40                 # 1 pb = 1e-40 m2
+
+    mz = 91.1876                     # Z mass in GeV
+    ALPHA = 1/137.035999084          # fine-structure constant
+    SW2 = 0.23126
+    gLnu = 0.5 * np.sqrt(1.0 / (SW2 * (1.0 - SW2)))  # left-handed coupling
+    hbarc2 = 0.389379e9              # (ħc)^2 in pb GeV2
+    pi = np.pi
+
+    # convert s from J2 to GeV2 
+    shat = s_joule2 / (GeV_to_J ** 2)
+
+    # XS computation 
+    y = shat / mz**2
+    sqrt_term = np.sqrt((-4 + y) * y)
+
+    sigma = (
+        512.0 / (-2 + y) / np.sqrt((-4 + y) * y)
+        * (
+            (
+                (-np.log(-1 + (-2 + y) / np.sqrt((-4 + y) * y))
+                 + np.log(1 + (-2 + y) / np.sqrt((-4 + y) * y)))
+                * (4 + y**2) / 2.0
+            )
+            + 2 * np.sqrt((-4 + y) * y)
+            - np.sqrt((-4 + y) * y**3)
+        )
+    )
+
+    ps_factor = (1.0 / (16.0 * pi)) * np.sqrt(1.0 - 4.0 / y)
+    prefactor = (ALPHA**2) * (pi**2) * (gLnu**2) * (np.conj(gLnu)**2)
+    flux = 1.0 / (2.0 * shat)
+    sym_fac = 2.0
+
+    sigma_pb = sigma * (ps_factor * prefactor.real * flux / sym_fac) * hbarc2
+
+    # convert pb to m2
+    sigma_m2 = sigma_pb * pb_to_m2
+    return sigma_m2.real
+
 def sigmaNuNuxWProd(s):
     """Neutrino-(anti)neutrino (t-channel lepton exchange + s-channel Z-exchange) interaction cross section, Z bosons production, see Roulet (1992) Eq. 2.6"""
     smin = 4.*mW2
@@ -316,19 +365,48 @@ def sigmaNuNuxWProd(s):
 
 def sigmaNuiNujZel(s):
     """(anti)Neutrino_i-(anti)neutrino_j Z-exchange t-channel elastic scatter cross section, see Roulet (1992) Eq. 2.7"""
+    '''
     smin = 4.*mNu2
     if (s < smin):
         return 0.
-    
+    '''
     return Gf*Gf*mZ2*0.5/math.pi/h_planck/h_planck/c_light/c_light/(2.*math.pi)/(2.*math.pi)*s/(s+mZ2)
 
 def sigmaNuNuel(s):
     """(anti)Neutrino-(anti)neutrino u-channel elastic scatter cross section, see Roulet (1992) Eq. 2.8"""
+    '''
     smin = 4.*mNu2
     if (s < smin):
         return 0.
-    
+    '''
     return Gf*Gf*mZ2/2./math.pi/h_planck/h_planck/c_light/c_light*(2.*math.pi)*(2.*math.pi)*(s/(s+mZ2)+2.*mZ2/(2.*mZ2+s)*np.log(1.+s/mZ2))
+
+def sigmaNuNuxZresNu(s):
+    """Neutrino-(anti)neutrino Z-exchange s-channel interaction cross section, see Roulet (1992) Eq. 2.1"""
+    '''
+    smin = 4.*mNu2
+    if (s < smin):
+        return 0.
+    '''
+    # expression from Rhorry's code 
+    # Rhorry's constant definitions
+    
+    J_to_GeV = 1.0 / 1.602176634e-10
+    s = s * J_to_GeV**2 
+    
+    pb_to_cm2 = 1e-36
+    
+    mz = 91.15348062
+    gz = 2.494266379
+    gf = 1.16638e-5
+    MZ2C = complex(mz * mz, -gz * mz)
+    t3 = 0.5
+    hbarc2 = 3.8937966e8
+    prop = 1.0 / (s - MZ2C)
+    spz = prop * prop.conjugate() * (mz ** 4) * s
+        
+    sigma = 2.0 * (gf ** 2) * spz.real * (t3 ** 2) / (3.0 * np.pi)
+    return sigma * hbarc2 * pb_to_cm2 * cm**2
 
 ###################
 sigmaNuNuxZres = [
@@ -398,6 +476,8 @@ def getTabulatedEffectiveXS(sigma, skin, mass, field):
                  sigmaNuNuxZresTa,
                  sigmaNuNuxZresUp,
                  sigmaNuNuxZresDown,
+                 sigma_ZZ_incl_Rhorry, # new computations
+                 sigmaNuNuxZresNu, # new computations
                  sigmaNuNuxZresCharm,
                  sigmaNuNuxZresStrange,
                  sigmaNuNuxZresTop,
@@ -407,7 +487,8 @@ def getTabulatedEffectiveXS(sigma, skin, mass, field):
                  sigmaNuiNuxjWMuTax,
                  sigmaNuiNuxjWTaElx,
                  sigmaNuiNuxjWTaMux, sigmaNuiNuxjZel,
-                 sigmaNuNuxWProd, sigmaNuNuxZProd):  
+                 sigmaNuNuxWProd, sigmaNuNuxZProd,
+                 sigma_ZZ_incl_Rhorry, sigmaNuNuxZresNu):  
         # neutrino-neutrino interaction
         return np.array([sigma(s) for s in skin + (mass * mass + field.mass * field.mass) * c_squared * c_squared])
     return False
@@ -429,6 +510,7 @@ def getSmin(sigma):
         
             sigmaNuNuxWProd: 4.*mW2,
             sigmaNuNuxZProd: 4.*mZ2,
+            sigma_ZZ_incl_Rhorry: 4.*mZ2,
             sigmaNuNuxWZEl: 4.*me2,
             sigmaNuNuxWZMu: 4.*mm2,
             sigmaNuNuxWZTa: 4.*mt2,
@@ -466,13 +548,15 @@ def getEffectiveSmin(sigma, mass, field):
             sigmaNuiNuxjZel: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared,
             sigmaNuNuel: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared, 
             sigmaNuiNujZel: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared,
-        
+            sigmaNuNuxZresNu: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared, # new computations
+            
             sigmaNuElGamma: (np.sqrt(mW2)+np.sqrt(me2))**2,
             sigmaNuMuGamma: (np.sqrt(mW2)+np.sqrt(mm2))**2,
             sigmaNuTauGamma: (np.sqrt(mW2)+np.sqrt(mt2))**2,
             
             sigmaNuNuxWProd: 4.*mW2,
             sigmaNuNuxZProd: 4.*mZ2,
+            sigma_ZZ_incl_Rhorry: 4.*mZ2, # new computations
             sigmaNuNuxWZEl: 4.*me2,
             sigmaNuNuxWZMu: 4.*mm2,
             sigmaNuNuxWZTa: 4.*mt2,
@@ -723,7 +807,25 @@ def process_massiveBackground(sigma, mass, field, name, z):
     # Note: integration method (Romberg) requires 2^n + 1 log-spaced tabulation points
     s_kin = np.logspace(4, 28, 2 ** 18 + 1) * eV**2  
     xs = getTabulatedEffectiveXS(sigma, s_kin, mass, field)
+    '''
+    import matplotlib.pyplot as plt 
+    plt.plot(s_kin / eV**2, xs / cm**2)
+
+    plt.xlabel(r"$s_{kin}$ ($eV^{2}$)")
+    plt.ylabel(r"$\sigma$ ($cm^{2}$)")
     
+    dirFig = "/Users/a39392/Desktop/neutrinoGammaInteraction/images/newComputationXS/"
+    figName = name.split('/', 1)[1]
+    plt.loglog()
+    ext = ".png"
+    
+    target_s = 4e22 * eV**2
+    cross_at_target = np.interp(target_s, s_kin, xs)
+    print("The XS at s=", target_s / eV**2, " eV2 is ", cross_at_target / cm**2, " cm2")
+    
+    plt.savefig(dirFig + figName + ext)
+    plt.show()
+    '''
     # tabulated energies, limit to energies where the interaction is possible
     Emin = getEmin_massiveBackground(sigma, mass, field, z=z)    
     EmineV = Emin / eV
@@ -838,7 +940,6 @@ if __name__ == "__main__":
         process(sigmaNuiNuxjWTaMux, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojTauAntimuon', z)
 '''    
 
-
 masses = np.array([0, 8.6, 50]) * 1e-3 * eV / c_light / c_light
 redshifts = np.array([0, 2, 5, 8, 11, 15, 20, 25, 30, 40, 50])
 
@@ -864,20 +965,23 @@ if __name__ == "__main__":
                 '''
                 process_massiveBackground(sigmaNuNuel, mass, field, 'NeutrinoNeutrinoInteraction/NeutrinoNeutrinoElastic', z)
                 process_massiveBackground(sigmaNuiNujZel, mass, field, 'NeutrinoNeutrinoInteraction/NeutrinoiNeutrinojElastic', z)
-                '''
-                '''
-                process_massiveBackground(sigmaNuNuxWProd, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoWProduction', z)    
+             
+                
+                # done
+                #process_massiveBackground(sigmaNuNuxWProd, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoWProduction', z)    
                 process_massiveBackground(sigmaNuNuxZProd, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoZProduction', z)
                 process_massiveBackground(sigmaNuNuxZel, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoElastic', z)
-                '''
-                process_massiveBackground(sigmaNuiNuxjZel, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojElastic', z)
-                '''
+            
+                # done
+                #process_massiveBackground(sigmaNuiNuxjZel, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojElastic', z)
+                
                 process_massiveBackground(sigmaNuNuxWZEl, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoElectron', z)
                 process_massiveBackground(sigmaNuNuxWZMu, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoMuon', z)
                 process_massiveBackground(sigmaNuNuxWZTa, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoTau', z)
-                '''
-                process_massiveBackground(sigmaNuNuxZresEl, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceElectron', z)
-                '''
+                
+                # done
+                #process_massiveBackground(sigmaNuNuxZresEl, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceElectron', z)
+                
                 process_massiveBackground(sigmaNuNuxZresMu, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceMuon', z)
                 
                 process_massiveBackground(sigmaNuNuxZresTa, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceTau', z)
@@ -893,11 +997,17 @@ if __name__ == "__main__":
                 process_massiveBackground(sigmaNuiNuxjWMuElx, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojMuonAntielectron', z)
                 process_massiveBackground(sigmaNuiNuxjWMuTax, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojMuonAntitau', z)
                 process_massiveBackground(sigmaNuiNuxjWTaElx, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojTauAntielectron', z)
-                process_massiveBackground(sigmaNuiNuxjWTaMux, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojTauAntimuon', z)
                 '''
-        
+                #process_massiveBackground(sigmaNuiNuxjWTaMux, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojTauAntimuon', z)
+                
+                #process_massiveBackground(sigmaNuNuxZresNu, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceNu', z)
  
-        
+                # sigma_ZZ_incl_Rhorry
+                process_massiveBackground(sigma_ZZ_incl_Rhorry, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoZProduction', z)
+                #break
+            
+            
+    
         
         
         
