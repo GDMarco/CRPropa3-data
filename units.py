@@ -166,6 +166,7 @@ massQuarkStrangeGeV = 95e-3 #GeV/c^2
 massStrangekg = mWkg * massQuarkStrangeGeV / massWGeV #kg
 mStrange2 = (massStrangekg*c_light**2.) ** 2 # squared up quark mass [J^2/c^4]
 
+# check this mass!!! 
 massQuarkTopGeV = 173210e-3 #GeV/c^2
 massTopkg = mWkg * massQuarkTopGeV / massWGeV #kg
 mTop2 = (massTopkg*c_light**2.) ** 2 # squared up quark mass [J^2/c^4]

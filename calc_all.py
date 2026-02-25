@@ -12,9 +12,9 @@ cmb = [
      ]
 
 reduced_fields = [
-        photonField.CMB(),
+        #photonField.CMB(),
         photonField.EBL_Saldana21(),
-        #photonField.URB_Nitu21()
+        photonField.URB_Nitu21()
     ]
 
 fields_cmbebl = [

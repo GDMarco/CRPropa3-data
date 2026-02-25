@@ -537,13 +537,13 @@ def getSmin(sigma):
 def getEffectiveSmin(sigma, mass, field):
     """ Return minimum required s_kin = s - (mc^2)^2 for interaction, for interacting massive neutrinos """
     
-    if field.name == 'CMB':  # to extend to all the photon backgrounds
+    if (field.name == 'CMB' or field.name == 'IRB_Saldana21' or field.name == 'URB_Nitu21'):  
         fieldMass = 0 
     else: 
+        
         fieldMass = field.mass
     
     return {
-               
             sigmaNuNuxZel: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared,
             sigmaNuiNuxjZel: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared,
             sigmaNuNuel: (mass * mass + fieldMass * fieldMass) * c_squared * c_squared, 
@@ -587,7 +587,7 @@ def getEmin(sigma, field, z=0):
 def getEmin_massiveBackground(sigma, mass, field, z=0):
     """ Return minimum required (massive) neutrino energy for interaction *sigma* with *field* of (massive) neutrinos"""
     
-    if (field.name == 'CMB'):   # to generalise to all the photon fields 
+    if (field.name == 'CMB' or field.name == 'IRB_Saldana21' or field.name == 'URB_Nitu21'):   # to generalise to all the photon fields 
         return getEffectiveSmin(sigma, mass, field) / 4 / field.getEmax(z=z)
     else:
         return getEffectiveSmin(sigma, mass, field) * 0.5 / (np.sqrt(field.getPmax(z=z)**2 * c_squared + field.mass * field.mass * c_squared * c_squared) + c_light * field.getPmax(z=z))
@@ -683,6 +683,7 @@ def process(sigma, field, name, z):
 
     del data, rate, skin, skin_save, rate_save
     
+
 def process_photonBackground(sigma, mass, field, name, z=0):
     """ 
         calculate the interaction rates for a given process on a given photon field 
@@ -705,6 +706,9 @@ def process_photonBackground(sigma, mass, field, name, z=0):
     # Note: integration method (Romberg) requires 2^n + 1 log-spaced tabulation points
     s_kin = np.logspace(4, 28, 2 ** 18 + 1) * eV**2  
     xs = getTabulatedEffectiveXS(sigma, s_kin, mass, field)
+    
+    print(field)
+    print(field.name)
     
     # tabulated energies, limit to energies where the interaction is possible
     Emin = getEmin_massiveBackground(sigma, mass, field, z)
@@ -784,6 +788,144 @@ def process_photonBackground(sigma, mass, field, name, z=0):
     np.savetxt(fname, data, fmt=fmt, header=header)
 
     del data, rate, skin, skin_save, rate_save
+
+
+def getEmin_massiveBackground_fromFile(sigmaID, mass, field, z=0):
+    """ Return minimum required (massive) neutrino energy for interaction *sigma* with *field* of (massive) neutrinos"""
+    return {
+        29: (np.sqrt(mW2)+np.sqrt(mm2))**2 / 4 / field.getEmax(z=z),
+        113: (np.sqrt(mt2)+np.sqrt(mm2))**2 / 4 / field.getEmax(z=z)
+    } [sigmaID]
+
+def process_photonBackground_fromFile(sigmaID, mass, field, name, z=0):
+    """ 
+        calculate the interaction rates for a given process on a given photon field 
+
+        sigma : crossection (function) of the NuNu-process
+        mass : mass of the propagating neutrino (kg)
+        field : neutrino field as defined in neutrinoField.py
+        name  : name of the process which will be calculated. Necessary for the naming of the data folder
+    """
+    
+    folder = "/Users/a39392/Desktop/neutrinoGammaInteraction/NuPropa/checks/"
+    
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    
+    # -------------------------------------------
+    # calculate interaction rates
+    # -------------------------------------------
+    # tabulated values of s_kin = s - mc^2
+    # Note: integration method (Romberg) requires 2^n + 1 log-spaced tabulation points
+    data = np.genfromtxt(
+        folder + f"SigmaIncl_Ecms_channel{sigmaID}_s1.txt",  # replace with your filename
+        comments="#",         # ignore lines starting with #
+        usecols=(0, 1)        # first and third columns
+    )
+    
+    pb_to_m2 = 1e-40  
+    
+    # Split into separate arrays
+    s = data[:, 0]**2 * GeV**2   # GeV
+    xs = data[:, 1] * pb_to_m2 # pb to m2 
+    
+    from scipy.interpolate import interp1d
+    
+    # Kinematic points for interpolation
+    s_kin = np.logspace(4, 28, 2**18 + 1) * eV**2
+    s_points = s_kin + mass**2 * c_squared**2
+    
+    # Create interpolation function
+    interp_func = interp1d(
+        s, xs, kind='linear', fill_value='extrapolate', assume_sorted=True
+    )
+    
+    # Interpolate
+    xs_ext = interp_func(s_points)
+    
+    print(field)
+    print(field.name)
+    
+    # tabulated energies, limit to energies where the interaction is possible
+    Emin = getEmin_massiveBackground_fromFile(sigmaID, mass, field, z)
+    E = np.logspace(10, 27, 500) * eV 
+    E = E[E > Emin]
+    
+    EmineV = Emin / eV
+    print("Emin (eV): " + f"{EmineV:.2e}")
+    
+    rate = interactionRate.calc_rate_s(s_kin, xs_ext, E, field, z=z)
+
+    masseV = mass / eV * c_light * c_light
+    tol = 1e-4
+
+    if abs(masseV - 0) < tol:
+        massNu = "m1"
+    elif abs(masseV - 8.6e-3) < tol:
+        massNu = "m2"
+    elif abs(masseV - 50e-3) < tol:
+        massNu = "m3"
+
+    # save
+    fname = folder + '/rate_%s_%s_%i.txt' % (field.name, massNu, sigmaID) # _z%.1f , z)
+    data = np.c_[np.log10(E / eV), rate]
+    fmt = '%.2f\t%8.7e'
+    try:
+        git_hash = gh.get_git_revision_hash()
+        header = ("%s interaction rates\nneutrino field: %s\n"% (name, field.info)
+                  +"Produced with crpropa-data version: "+git_hash+"\n"
+                  +"log10(E/eV), 1/lambda [1/Mpc]" )
+    except:
+        header = ("%s interaction rates\nneutrino field: %s\n"% (name, field.info)
+                  +"log10(E/eV), 1/lambda [1/Mpc]")
+    np.savetxt(fname, data, fmt=fmt, header=header)
+    
+    '''
+    # -------------------------------------------
+    # calculate cumulative differential interaction rates for sampling s values
+    # -------------------------------------------
+    # find minimum value of s_kin
+    skin1 = getEffectiveSmin(sigma, mass, field)  # s threshold for interaction
+    
+    # both fields are considered relativistic
+    skin2 = 4 * field.getEmin(z=z) * E[0]  # minimum achievable s in collision with background photon (at any tabulated E)
+    skin_min = max(skin1, skin2)
+
+    # tabulated values of s_kin = s - mc^2, limit to relevant range
+    # Note: use higher resolution and then downsample
+    skin = np.logspace(4, 28, 380000 + 1) * eV**2 
+    skin = skin[skin > skin_min] 
+
+    xs = getTabulatedXS(sigma, skin)
+    rate = interactionRate.calc_rate_s(skin, xs, E, field, z=z, cdf=True)
+
+    print("rate shape: ", rate.shape)
+    print("max/min final rate (Mpc^-1): ", np.max(rate), np.min(rate))
+
+    # downsample
+    skin_save = np.logspace(4, 28, 390 + 1) * eV**2 
+    skin_save = skin_save[skin_save > skin_min] 
+    rate_save = np.array([np.interp(skin_save, skin, r) for r in rate])
+
+    # save
+    data = np.c_[np.log10(E / eV), rate_save]  # prepend log10(E/eV) as first column
+    row0 = np.r_[0, np.log10(skin_save / eV**2)][np.newaxis]
+    data = np.r_[row0, data]  # prepend log10(s_kin/eV^2) as first row
+
+    fname = folder + '/cdf_%s_%s.txt' % (field.name, massNu) #_z%.1f , z)
+    fmt = '%.2f' + '\t%6.5e' * np.shape(rate_save)[1]
+    try:
+        git_hash = gh.get_git_revision_hash()
+        header = ("%s cumulative differential rate\nphoton field: %s\n"% (name, field.info)
+                  +"Produced with crpropa-data version: "+git_hash+"\n"
+                  +"log10(E/eV), d(1/lambda)/ds_kin [1/Mpc/eV^2] for log10(s_kin/eV^2) as given in first row" )
+    except:
+        header = ("%s cumulative differential rate\nphoton field: %s\n"% (name, field.info)
+                  +"log10(E/eV), d(1/lambda)/ds_kin [1/Mpc/eV^2] for log10(s_kin/eV^2) as given in first row")
+    np.savetxt(fname, data, fmt=fmt, header=header)
+    
+    del data, rate, skin, skin_save, rate_save
+    '''
 
 
 def process_massiveBackground(sigma, mass, field, name, z):
@@ -942,12 +1084,15 @@ if __name__ == "__main__":
 
 masses = np.array([0, 8.6, 50]) * 1e-3 * eV / c_light / c_light
 redshifts = np.array([0, 2, 5, 8, 11, 15, 20, 25, 30, 40, 50])
+sigmaID = [113, 29]
 
 # the CMB does not change with the redshift, naive scaling of the field and the IMFP
 if __name__ == "__main__":
-    
+
     for field in cmb: #reduced_fields:
         for mass in masses:
+            for ID in sigmaID: 
+                process_photonBackground_fromFile(ID, mass, field, ID)
             '''
             print(field.name)
             process_photonBackground(sigmaNuElGamma, mass, field, 'NeutrinoPhotonInteraction/NeutrinoElectronPhotonInteraction')
@@ -961,8 +1106,9 @@ if __name__ == "__main__":
         for field in fields_massiveCnuB:   
             for mass in masses:
             
-                print(field.name)
+                
                 '''
+                print(field.name)
                 process_massiveBackground(sigmaNuNuel, mass, field, 'NeutrinoNeutrinoInteraction/NeutrinoNeutrinoElastic', z)
                 process_massiveBackground(sigmaNuiNujZel, mass, field, 'NeutrinoNeutrinoInteraction/NeutrinoiNeutrinojElastic', z)
              
@@ -997,7 +1143,7 @@ if __name__ == "__main__":
                 process_massiveBackground(sigmaNuiNuxjWMuElx, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojMuonAntielectron', z)
                 process_massiveBackground(sigmaNuiNuxjWMuTax, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojMuonAntitau', z)
                 process_massiveBackground(sigmaNuiNuxjWTaElx, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojTauAntielectron', z)
-                '''
+                
                 #process_massiveBackground(sigmaNuiNuxjWTaMux, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoiAntineutrinojTauAntimuon', z)
                 
                 #process_massiveBackground(sigmaNuNuxZresNu, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoResonanceNu', z)
@@ -1005,7 +1151,7 @@ if __name__ == "__main__":
                 # sigma_ZZ_incl_Rhorry
                 process_massiveBackground(sigma_ZZ_incl_Rhorry, mass, field, 'NeutrinoAntineutrinoInteraction/NeutrinoAntineutrinoZProduction', z)
                 #break
-            
+                '''
             
     
         
