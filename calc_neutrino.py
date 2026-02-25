@@ -793,6 +793,7 @@ def process_photonBackground(sigma, mass, field, name, z=0):
 def getEmin_massiveBackground_fromFile(sigmaID, mass, field, z=0):
     """ Return minimum required (massive) neutrino energy for interaction *sigma* with *field* of (massive) neutrinos"""
     return {
+        # FOR RHORRY, TO ADD THE CHANNEL THRESHOLD ATTACHED TO ID
         29: (np.sqrt(mW2)+np.sqrt(mm2))**2 / 4 / field.getEmax(z=z),
         113: (np.sqrt(mt2)+np.sqrt(mm2))**2 / 4 / field.getEmax(z=z)
     } [sigmaID]
@@ -807,6 +808,7 @@ def process_photonBackground_fromFile(sigmaID, mass, field, name, z=0):
         name  : name of the process which will be calculated. Necessary for the naming of the data folder
     """
     
+    # FOR RHORRY, TO CHANGE THIS DIRECTORY TO YOURS
     folder = "/Users/a39392/Desktop/neutrinoGammaInteraction/NuPropa/checks/"
     
     if not os.path.exists(folder):
@@ -1084,6 +1086,7 @@ if __name__ == "__main__":
 
 masses = np.array([0, 8.6, 50]) * 1e-3 * eV / c_light / c_light
 redshifts = np.array([0, 2, 5, 8, 11, 15, 20, 25, 30, 40, 50])
+# FOR RHORRY, TO ADD THE CHANNEL YOU WANT TO TEST
 sigmaID = [113, 29]
 
 # the CMB does not change with the redshift, naive scaling of the field and the IMFP
